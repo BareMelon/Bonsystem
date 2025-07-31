@@ -8,13 +8,12 @@ interface Settings {
 }
 
 interface Stats {
-  total_orders: number;
-  new_orders: number;
-  processing_orders: number;
-  ready_orders: number;
-  completed_orders: number;
-  cancelled_orders: number;
-  today_orders: number;
+  totalOrders: number;
+  newOrders: number;
+  processingOrders: number;
+  readyOrders: number;
+  sentOrders: number;
+  cancelledOrders: number;
 }
 
 const Admin: React.FC = () => {
@@ -85,28 +84,28 @@ const Admin: React.FC = () => {
           <h2>Statistik</h2>
           <div className="stats-grid">
             <div className="stat-item">
-              <div className="stat-number">{stats.total_orders}</div>
+              <div className="stat-number">{stats.totalOrders}</div>
               <div className="stat-label">Total Bestillinger</div>
             </div>
             <div className="stat-item">
-              <div className="stat-number">{stats.new_orders}</div>
+              <div className="stat-number">{stats.newOrders}</div>
               <div className="stat-label">Nye</div>
             </div>
             <div className="stat-item">
-              <div className="stat-number">{stats.processing_orders}</div>
+              <div className="stat-number">{stats.processingOrders}</div>
               <div className="stat-label">Behandles</div>
             </div>
             <div className="stat-item">
-              <div className="stat-number">{stats.ready_orders}</div>
+              <div className="stat-number">{stats.readyOrders}</div>
               <div className="stat-label">Klar</div>
             </div>
             <div className="stat-item">
-              <div className="stat-number">{stats.completed_orders}</div>
+              <div className="stat-number">{stats.sentOrders}</div>
               <div className="stat-label">Afsendt</div>
             </div>
             <div className="stat-item">
-              <div className="stat-number">{stats.today_orders}</div>
-              <div className="stat-label">I Dag</div>
+              <div className="stat-number">{stats.cancelledOrders}</div>
+              <div className="stat-label">Annulleret</div>
             </div>
           </div>
         </div>

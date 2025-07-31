@@ -62,17 +62,12 @@ router.get('/stats', async (req, res) => {
     const orders = await dbHelpers.getAllOrders();
 
     const stats = {
-      total_orders: orders.length,
-      new_orders: orders.filter(o => o.status === 'ny').length,
-      processing_orders: orders.filter(o => o.status === 'behandles').length,
-      ready_orders: orders.filter(o => o.status === 'klar').length,
-      completed_orders: orders.filter(o => o.status === 'afsendt').length,
-      cancelled_orders: orders.filter(o => o.status === 'annulleret').length,
-      today_orders: orders.filter(o => {
-        const today = new Date().toDateString();
-        const orderDate = new Date(o.created_at).toDateString();
-        return today === orderDate;
-      }).length
+      totalOrders: orders.length,
+      newOrders: orders.filter(o => o.status === 'ny').length,
+      processingOrders: orders.filter(o => o.status === 'behandles').length,
+      readyOrders: orders.filter(o => o.status === 'klar').length,
+      sentOrders: orders.filter(o => o.status === 'afsendt').length,
+      cancelledOrders: orders.filter(o => o.status === 'annulleret').length
     };
 
     res.json({
