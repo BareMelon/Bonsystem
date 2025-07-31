@@ -2,6 +2,22 @@ const express = require('express');
 const router = express.Router();
 const { dbHelpers } = require('../database/database');
 
+// GET /api/admin/orders - Get all orders
+router.get('/orders', async (req, res) => {
+  try {
+    const orders = await dbHelpers.getAllOrders();
+    res.json({
+      success: true,
+      orders: orders
+    });
+  } catch (error) {
+    console.error('Fejl ved hentning af bestillinger:', error);
+    res.status(500).json({
+      error: 'Der opstod en fejl ved hentning af bestillinger'
+    });
+  }
+});
+
 // GET /api/admin/settings - Get all settings
 router.get('/settings', async (req, res) => {
   try {

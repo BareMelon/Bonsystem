@@ -1,3 +1,4 @@
+/* Modern minimalistic design for me&ma */
 * {
   margin: 0;
   padding: 0;
@@ -5,51 +6,58 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
-}
-
-.App {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  color: #2d3748;
+  line-height: 1.6;
 }
 
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 2rem;
 }
 
+/* Header */
 .header {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  padding: 1rem 0;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.header h1 {
   text-align: center;
-  color: #333;
-  font-size: 2.5rem;
-  font-weight: 700;
+  margin-bottom: 3rem;
+  padding: 2rem 0;
 }
 
+.logo {
+  font-size: 3.5rem;
+  font-weight: 300;
+  color: white;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.tagline {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 400;
+}
+
+/* Cards */
 .card {
   background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 15px;
-  padding: 2rem;
-  margin: 2rem 0;
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  padding: 2.5rem;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 2rem;
+  transition: all 0.3s ease;
 }
 
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Forms */
 .form-group {
   margin-bottom: 1.5rem;
 }
@@ -57,19 +65,21 @@ body {
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #333;
-  font-size: 1.1rem;
+  font-weight: 500;
+  color: #4a5568;
+  font-size: 0.95rem;
 }
 
 .form-group input,
 .form-group textarea {
   width: 100%;
-  padding: 12px 16px;
-  border: 2px solid #e1e5e9;
+  padding: 0.875rem 1rem;
+  border: 2px solid #e2e8f0;
   border-radius: 8px;
   font-size: 1rem;
-  transition: border-color 0.3s ease;
+  transition: all 0.2s ease;
+  background: white;
+  color: #2d3748;
 }
 
 .form-group input:focus,
@@ -79,107 +89,132 @@ body {
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.form-group textarea {
-  resize: vertical;
-  min-height: 100px;
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #a0aec0;
 }
 
+/* Buttons */
 .btn {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  padding: 12px 24px;
+  padding: 0.875rem 2rem;
   border-radius: 8px;
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
-  width: 100%;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
 }
 
 .btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.9);
+  color: #667eea;
+  border: 2px solid #667eea;
 }
 
-.success-message {
-  background: #d4edda;
-  color: #155724;
-  padding: 1rem;
+.btn-secondary:hover {
+  background: #667eea;
+  color: white;
+}
+
+/* Messages */
+.message {
+  padding: 1rem 1.5rem;
   border-radius: 8px;
   margin: 1rem 0;
-  border: 1px solid #c3e6cb;
+  font-weight: 500;
 }
 
-.error-message {
-  background: #f8d7da;
-  color: #721c24;
-  padding: 1rem;
-  border-radius: 8px;
-  margin: 1rem 0;
-  border: 1px solid #f5c6cb;
+.message.success {
+  background: #c6f6d5;
+  color: #22543d;
+  border: 1px solid #9ae6b4;
 }
 
-.loading {
+.message.error {
+  background: #fed7d7;
+  color: #742a2a;
+  border: 1px solid #feb2b2;
+}
+
+/* Admin link */
+.admin-link {
   text-align: center;
-  padding: 2rem;
-  color: #666;
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
 }
 
-.order-list {
-  display: grid;
-  gap: 1rem;
+.admin-link a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.2s ease;
 }
 
-.order-item {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 1rem;
-  border-left: 4px solid #667eea;
+.admin-link a:hover {
+  opacity: 0.8;
 }
 
-.order-item h3 {
-  color: #333;
-  margin-bottom: 0.5rem;
-}
-
-.order-item p {
-  color: #666;
-  margin: 0.25rem 0;
-}
-
-.status-badge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.status-ny { background: #fff3cd; color: #856404; }
-.status-behandles { background: #cce5ff; color: #004085; }
-.status-klar { background: #d1ecf1; color: #0c5460; }
-.status-afsendt { background: #d4edda; color: #155724; }
-.status-annulleret { background: #f8d7da; color: #721c24; }
-
+/* Responsive */
 @media (max-width: 768px) {
   .container {
-    padding: 10px;
-  }
-  
-  .header h1 {
-    font-size: 2rem;
+    padding: 1rem;
   }
   
   .card {
     padding: 1.5rem;
-    margin: 1rem 0;
   }
+  
+  .logo {
+    font-size: 2.5rem;
+  }
+  
+  .tagline {
+    font-size: 1rem;
+  }
+}
+
+/* Utility classes */
+.text-center {
+  text-align: center;
+}
+
+.mb-2 {
+  margin-bottom: 1rem;
+}
+
+.mt-2 {
+  margin-top: 1rem;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.gap-4 {
+  gap: 1rem;
 } 

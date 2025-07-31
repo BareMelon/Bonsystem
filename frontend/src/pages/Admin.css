@@ -170,6 +170,42 @@
   transform: translateY(-1px);
 }
 
+/* Admin page specific styles */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 1rem;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #667eea;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+/* Order board container */
+.order-board-container {
+  margin-top: 1rem;
+}
+
+/* Responsive adjustments */
 @media (max-width: 768px) {
   .control-buttons {
     flex-direction: column;
@@ -184,6 +220,14 @@
   }
   
   .stat-card .stat-number {
+    font-size: 1.5rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .stat-number {
     font-size: 1.5rem;
   }
 } 

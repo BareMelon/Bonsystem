@@ -1,149 +1,146 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { adminAPI } from '../services/api';
 import OrderBoard from '../components/OrderBoard';
-import { adminAPI, Settings, Stats } from '../services/api';
 import './Admin.css';
 
+interface Settings {
+  restaurant_name?: string;
+}
+
+interface Stats {
+  total_orders: number;
+  new_orders: number;
+  processing_orders: number;
+  ready_orders: number;
+  completed_orders: number;
+  cancelled_orders: number;
+  today_orders: number;
+}
+
 const Admin: React.FC = () => {
-  const [settings, setSettings] = useState<Settings | null>(null);
+  const [settings, setSettings] = useState<Settings>({});
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [showSettings, setShowSettings] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
-  const fetchData = async () => {
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
     try {
-      setLoading(true);
-      const [settingsResponse, statsResponse] = await Promise.all([
+      const [settingsData, statsData] = await Promise.all([
         adminAPI.getSettings(),
         adminAPI.getStats()
       ]);
-
-      if (settingsResponse.success) {
-        setSettings(settingsResponse.settings || null);
-      }
-
-      if (statsResponse.success) {
-        setStats(statsResponse.stats || null);
-      }
-
-      if (!settingsResponse.success || !statsResponse.success) {
-        setError('Kunne ikke hente admin data');
-      }
-    } catch (err) {
-      setError('Der opstod en fejl ved hentning af data');
+      setSettings(settingsData);
+      setStats(statsData);
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Kunne ikke indlæse data' });
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const handleRefresh = () => {
-    setRefreshTrigger(prev => prev + 1);
-    fetchData();
-  };
-
-  const handleSettingUpdate = async (key: keyof Settings, value: string) => {
-    if (!settings) return;
-
+  const handleSettingsUpdate = async (newSettings: Settings) => {
     try {
-      const response = await adminAPI.updateSettings({ [key]: value });
-      if (response.success) {
-        setSettings(prev => prev ? { ...prev, [key]: value } : null);
-      } else {
-        setError(response.error || 'Kunne ikke opdatere indstilling');
-      }
-    } catch (err) {
-      setError('Der opstod en fejl ved opdatering af indstilling');
+      await adminAPI.updateSettings(newSettings);
+      setSettings(newSettings);
+      setMessage({ type: 'success', text: 'Indstillinger opdateret' });
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Kunne ikke opdatere indstillinger' });
     }
   };
 
   if (loading) {
     return (
-      <div className="admin-page">
-        <div className="loading-admin">
-          <div className="loading-spinner"></div>
-          <p>Indlæser admin panel...</p>
+      <div className="container">
+        <div className="header">
+          <h1 className="logo">me&ma</h1>
+          <p className="tagline">Admin Panel</p>
+        </div>
+        <div className="card text-center">
+          <p>Indlæser...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="admin-page">
-      <div className="container">
-        <header className="header">
-          <h1>👨‍💼 Admin Panel</h1>
-          <Link to="/" className="back-btn">← Tilbage til bestilling</Link>
-        </header>
+    <div className="container">
+      <div className="header">
+        <h1 className="logo">me&ma</h1>
+        <p className="tagline">Admin Panel</p>
+      </div>
 
-        {error && (
-          <div className="error-message">
-            {error}
-            <button onClick={fetchData} className="retry-btn">Prøv igen</button>
-          </div>
-        )}
-
-        <div className="admin-controls">
-          <div className="control-buttons">
-            <button 
-              onClick={handleRefresh} 
-              className="refresh-btn"
-            >
-              🔄 Opdater
-            </button>
-            <button 
-              onClick={() => setShowSettings(!showSettings)} 
-              className="settings-btn"
-            >
-              ⚙️ Indstillinger
-            </button>
-          </div>
-
-          {stats && (
-            <div className="stats-overview">
-              <div className="stat-card">
-                <span className="stat-number">{stats.total_orders}</span>
-                <span className="stat-label">Total Bestillinger</span>
-              </div>
-              <div className="stat-card">
-                <span className="stat-number">{stats.today_orders}</span>
-                <span className="stat-label">I Dag</span>
-              </div>
-              <div className="stat-card">
-                <span className="stat-number">{stats.new_orders}</span>
-                <span className="stat-label">Nye</span>
-              </div>
-              <div className="stat-card">
-                <span className="stat-number">{stats.processing_orders}</span>
-                <span className="stat-label">Behandles</span>
-              </div>
-            </div>
-          )}
+      {message && (
+        <div className={`message ${message.type}`}>
+          {message.text}
         </div>
+      )}
 
-        {showSettings && settings && (
-          <div className="settings-panel">
-            <h3>⚙️ System Indstillinger</h3>
-            <div className="settings-grid">
-              <div className="setting-group">
-                <label>Restaurant Navn:</label>
-                <input
-                  type="text"
-                  value={settings.restaurant_name}
-                  onChange={(e) => handleSettingUpdate('restaurant_name', e.target.value)}
-                  placeholder="Restaurant navn"
-                />
-              </div>
+      {/* Stats Overview */}
+      {stats && (
+        <div className="card">
+          <h2>Statistik</h2>
+          <div className="stats-grid">
+            <div className="stat-item">
+              <div className="stat-number">{stats.total_orders}</div>
+              <div className="stat-label">Total Bestillinger</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-number">{stats.new_orders}</div>
+              <div className="stat-label">Nye</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-number">{stats.processing_orders}</div>
+              <div className="stat-label">Behandles</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-number">{stats.ready_orders}</div>
+              <div className="stat-label">Klar</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-number">{stats.completed_orders}</div>
+              <div className="stat-label">Afsendt</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-number">{stats.today_orders}</div>
+              <div className="stat-label">I Dag</div>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        <OrderBoard refreshTrigger={refreshTrigger} />
+      {/* Settings */}
+      <div className="card">
+        <h2>Indstillinger</h2>
+        <div className="form-group">
+          <label htmlFor="restaurant_name">Restaurant Navn</label>
+          <input
+            type="text"
+            id="restaurant_name"
+            value={settings.restaurant_name || ''}
+            onChange={(e) => setSettings({ ...settings, restaurant_name: e.target.value })}
+            placeholder="me&ma"
+          />
+        </div>
+        <button 
+          className="btn" 
+          onClick={() => handleSettingsUpdate(settings)}
+        >
+          Gem Indstillinger
+        </button>
+      </div>
+
+      {/* Order Board */}
+      <div className="card">
+        <h2>Bestillinger</h2>
+        <OrderBoard />
+      </div>
+
+      <div className="admin-link">
+        <a href="/">Tilbage til Bestilling</a>
       </div>
     </div>
   );
