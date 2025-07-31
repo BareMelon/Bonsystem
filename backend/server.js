@@ -41,7 +41,7 @@ app.get('/', (req, res) => {
   res.json({ message: 'Bon System Backend er kørende' });
 });
 
-// Database setup (with error handling)
+// Database setup (with error handling) - Updated for better-sqlite3
 console.log('Setting up database...');
 let db;
 try {
