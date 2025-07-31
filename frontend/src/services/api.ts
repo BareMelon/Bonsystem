@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// API base URL - will use environment variable in production
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+// API base URL - use Railway backend in production
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://bonsystem-production.up.railway.app/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -10,22 +10,21 @@ const api = axios.create({
 
 // Types
 export interface Order {
-  id?: number;
+  id: number;
   mad: string;
   drikke?: string;
   ekstra_info?: string;
   telefon?: string;
-  status?: string;
-  created_at?: string;
-  updated_at?: string;
+  status: 'ny' | 'behandles' | 'klar' | 'afsendt' | 'annulleret';
+  created_at: string;
+  updated_at: string;
 }
 
 export interface OrderResponse {
   success: boolean;
-  message?: string;
+  message: string;
   order?: Order;
   orders?: Order[];
-  error?: string;
 }
 
 export interface Settings {
@@ -33,113 +32,90 @@ export interface Settings {
 }
 
 export interface Stats {
-  total_orders: number;
-  new_orders: number;
-  processing_orders: number;
-  ready_orders: number;
-  completed_orders: number;
-  cancelled_orders: number;
-  today_orders: number;
+  totalOrders: number;
+  newOrders: number;
+  processingOrders: number;
+  readyOrders: number;
+  sentOrders: number;
+  cancelledOrders: number;
 }
 
 // Order API
 export const orderAPI = {
-  createOrder: async (orderData: Order): Promise<OrderResponse> => {
+  createOrder: async (order: { mad: string; drikke?: string; ekstra_info?: string; telefon?: string }) => {
     try {
-      const response = await api.post('/orders', orderData);
+      const response = await api.post<OrderResponse>('/orders', order);
       return response.data;
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.response?.data?.error || 'Der opstod en fejl'
-      };
+    } catch (error) {
+      console.error('Fejl ved oprettelse af bestilling:', error);
+      throw new Error('Kunne ikke oprette bestilling');
     }
   },
-
-  getAllOrders: async (): Promise<OrderResponse> => {
+  getAllOrders: async () => {
     try {
-      const response = await api.get('/orders');
-      return response.data;
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.response?.data?.error || 'Der opstod en fejl'
-      };
+      const response = await api.get<OrderResponse>('/orders');
+      return response.data.orders || [];
+    } catch (error) {
+      console.error('Fejl ved hentning af bestillinger:', error);
+      throw new Error('Kunne ikke hente bestillinger');
     }
   },
-
-  getOrderById: async (id: number): Promise<OrderResponse> => {
+  getOrderById: async (id: number) => {
     try {
-      const response = await api.get(`/orders/${id}`);
-      return response.data;
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.response?.data?.error || 'Der opstod en fejl'
-      };
+      const response = await api.get<OrderResponse>(`/orders/${id}`);
+      return response.data.order;
+    } catch (error) {
+      console.error(`Fejl ved hentning af bestilling ${id}:`, error);
+      throw new Error('Kunne ikke hente bestilling');
     }
   },
-
-  updateOrderStatus: async (id: number, status: string): Promise<OrderResponse> => {
+  updateOrderStatus: async (id: number, status: string) => {
     try {
-      const response = await api.put(`/orders/${id}/status`, { status });
+      const response = await api.put<OrderResponse>(`/orders/${id}/status`, { status });
       return response.data;
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.response?.data?.error || 'Der opstod en fejl'
-      };
+    } catch (error) {
+      console.error(`Fejl ved opdatering af status for bestilling ${id}:`, error);
+      throw new Error('Kunne ikke opdatere bestillingsstatus');
     }
-  }
+  },
 };
 
 // Admin API
 export const adminAPI = {
-  getSettings: async (): Promise<{ success: boolean; settings?: Settings; error?: string }> => {
+  getSettings: async () => {
     try {
-      const response = await api.get('/admin/settings');
-      return response.data;
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.response?.data?.error || 'Der opstod en fejl'
-      };
+      const response = await api.get<{ settings: Settings }>('/admin/settings');
+      return response.data.settings;
+    } catch (error) {
+      console.error('Fejl ved hentning af indstillinger:', error);
+      throw new Error('Kunne ikke hente indstillinger');
     }
   },
-
-  updateSettings: async (settings: Partial<Settings>): Promise<{ success: boolean; message?: string; error?: string }> => {
+  updateSettings: async (settings: Settings) => {
     try {
-      const response = await api.put('/admin/settings', settings);
+      const response = await api.put<{ success: boolean; message: string }>('/admin/settings', settings);
       return response.data;
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.response?.data?.error || 'Der opstod en fejl'
-      };
+    } catch (error) {
+      console.error('Fejl ved opdatering af indstillinger:', error);
+      throw new Error('Kunne ikke opdatere indstillinger');
     }
   },
-
-  getStats: async (): Promise<{ success: boolean; stats?: Stats; error?: string }> => {
+  getStats: async () => {
     try {
-      const response = await api.get('/admin/stats');
-      return response.data;
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.response?.data?.error || 'Der opstod en fejl'
-      };
+      const response = await api.get<{ stats: Stats }>('/admin/stats');
+      return response.data.stats;
+    } catch (error) {
+      console.error('Fejl ved hentning af statistik:', error);
+      throw new Error('Kunne ikke hente statistik');
     }
   },
-
-  deleteOrder: async (id: number): Promise<{ success: boolean; message?: string; error?: string }> => {
+  deleteOrder: async (id: number) => {
     try {
-      const response = await api.delete(`/admin/orders/${id}`);
+      const response = await api.delete<{ success: boolean; message: string }>(`/admin/orders/${id}`);
       return response.data;
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.response?.data?.error || 'Der opstod en fejl'
-      };
+    } catch (error) {
+      console.error(`Fejl ved sletning af bestilling ${id}:`, error);
+      throw new Error('Kunne ikke slette bestilling');
     }
-  }
+  },
 }; 
