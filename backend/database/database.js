@@ -1,21 +1,27 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-// Database file path
-const dbPath = path.join(__dirname, 'bonsystem.db');
+// Database file path - use Railway's persistent storage if available
+const dbPath = process.env.DATABASE_URL || path.join(__dirname, 'bonsystem.db');
+
+console.log('Database path:', dbPath);
 
 // Create database connection
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
     console.error('Database error:', err.message);
+    console.error('Database path:', dbPath);
   } else {
     console.log('Forbundet til SQLite database');
+    console.log('Database path:', dbPath);
     initDatabase();
   }
 });
 
 // Initialize database tables
 function initDatabase() {
+  console.log('Initializing database tables...');
+  
   // Orders table
   db.run(`CREATE TABLE IF NOT EXISTS orders (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -53,6 +59,7 @@ function initDatabase() {
 
 // Insert default settings
 function insertDefaultSettings() {
+  console.log('Inserting default settings...');
   const defaultSettings = [
     { key: 'restaurant_name', value: 'Bon System' }
   ];
@@ -62,6 +69,8 @@ function insertDefaultSettings() {
       [setting.key, setting.value], (err) => {
         if (err) {
           console.error(`Fejl ved indsættelse af setting ${setting.key}:`, err);
+        } else {
+          console.log(`Setting ${setting.key} inserted`);
         }
       });
   });
