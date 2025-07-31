@@ -4,7 +4,7 @@ console.log('Using in-memory database for Railway');
 // In-memory storage
 let orders = [];
 let settings = [
-  { key: 'restaurant_name', value: 'Bon System' }
+  { key: 'restaurant_name', value: 'me&ma' }
 ];
 
 // Helper functions for database operations
