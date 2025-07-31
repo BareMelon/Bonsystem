@@ -1,0 +1,12 @@
+# Ignore everything except backend files
+../frontend/
+../node_modules/
+../package.json
+../package-lock.json
+../.gitignore
+../README.md
+../DEPLOYMENT.md
+../QUICK_START.md
+../TEST_GUIDE.md
+../FEATURES.md
+../vercel.json 
