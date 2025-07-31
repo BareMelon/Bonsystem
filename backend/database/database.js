@@ -1,4 +1,4 @@
-const sqlite3 = require('sqlite3').verbose();
+const Database = require('better-sqlite3');
 const path = require('path');
 
 // Database file path - use Railway's persistent storage if available
@@ -7,54 +7,53 @@ const dbPath = process.env.DATABASE_URL || path.join(__dirname, 'bonsystem.db');
 console.log('Database path:', dbPath);
 
 // Create database connection
-const db = new sqlite3.Database(dbPath, (err) => {
-  if (err) {
-    console.error('Database error:', err.message);
-    console.error('Database path:', dbPath);
-  } else {
-    console.log('Forbundet til SQLite database');
-    console.log('Database path:', dbPath);
-    initDatabase();
-  }
-});
+let db;
+try {
+  db = new Database(dbPath);
+  console.log('Forbundet til SQLite database');
+  console.log('Database path:', dbPath);
+  initDatabase();
+} catch (error) {
+  console.error('Database error:', error.message);
+  console.error('Database path:', dbPath);
+  db = null;
+}
 
 // Initialize database tables
 function initDatabase() {
   console.log('Initializing database tables...');
   
   // Orders table
-  db.run(`CREATE TABLE IF NOT EXISTS orders (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    mad TEXT NOT NULL,
-    drikke TEXT,
-    ekstra_info TEXT,
-    telefon TEXT,
-    status TEXT DEFAULT 'ny',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )`, (err) => {
-    if (err) {
-      console.error('Fejl ved oprettelse af orders tabel:', err);
-    } else {
-      console.log('Orders tabel er klar');
-    }
-  });
+  try {
+    db.exec(`CREATE TABLE IF NOT EXISTS orders (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      mad TEXT NOT NULL,
+      drikke TEXT,
+      ekstra_info TEXT,
+      telefon TEXT,
+      status TEXT DEFAULT 'ny',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+    console.log('Orders tabel er klar');
+  } catch (err) {
+    console.error('Fejl ved oprettelse af orders tabel:', err);
+  }
 
   // Settings table for admin configuration
-  db.run(`CREATE TABLE IF NOT EXISTS settings (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    key TEXT UNIQUE NOT NULL,
-    value TEXT NOT NULL,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )`, (err) => {
-    if (err) {
-      console.error('Fejl ved oprettelse af settings tabel:', err);
-    } else {
-      console.log('Settings tabel er klar');
-      // Insert default settings
-      insertDefaultSettings();
-    }
-  });
+  try {
+    db.exec(`CREATE TABLE IF NOT EXISTS settings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      key TEXT UNIQUE NOT NULL,
+      value TEXT NOT NULL,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+    console.log('Settings tabel er klar');
+    // Insert default settings
+    insertDefaultSettings();
+  } catch (err) {
+    console.error('Fejl ved oprettelse af settings tabel:', err);
+  }
 }
 
 // Insert default settings
@@ -65,14 +64,12 @@ function insertDefaultSettings() {
   ];
 
   defaultSettings.forEach(setting => {
-    db.run(`INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)`,
-      [setting.key, setting.value], (err) => {
-        if (err) {
-          console.error(`Fejl ved indsættelse af setting ${setting.key}:`, err);
-        } else {
-          console.log(`Setting ${setting.key} inserted`);
-        }
-      });
+    try {
+      db.prepare(`INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)`).run(setting.key, setting.value);
+      console.log(`Setting ${setting.key} inserted`);
+    } catch (err) {
+      console.error(`Fejl ved indsættelse af setting ${setting.key}:`, err);
+    }
   });
 }
 
@@ -80,72 +77,77 @@ function insertDefaultSettings() {
 const dbHelpers = {
   // Get all orders
   getAllOrders: () => {
-    return new Promise((resolve, reject) => {
-      db.all(`SELECT * FROM orders ORDER BY created_at DESC`, (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
-      });
-    });
+    if (!db) return Promise.resolve([]);
+    try {
+      const stmt = db.prepare(`SELECT * FROM orders ORDER BY created_at DESC`);
+      return Promise.resolve(stmt.all());
+    } catch (err) {
+      return Promise.reject(err);
+    }
   },
 
   // Get order by ID
   getOrderById: (id) => {
-    return new Promise((resolve, reject) => {
-      db.get(`SELECT * FROM orders WHERE id = ?`, [id], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
+    if (!db) return Promise.resolve(null);
+    try {
+      const stmt = db.prepare(`SELECT * FROM orders WHERE id = ?`);
+      return Promise.resolve(stmt.get(id));
+    } catch (err) {
+      return Promise.reject(err);
+    }
   },
 
   // Create new order
   createOrder: (orderData) => {
-    return new Promise((resolve, reject) => {
+    if (!db) return Promise.reject(new Error('Database not available'));
+    try {
       const { mad, drikke, ekstra_info, telefon } = orderData;
-      db.run(`INSERT INTO orders (mad, drikke, ekstra_info, telefon) VALUES (?, ?, ?, ?)`,
-        [mad, drikke, ekstra_info, telefon], function(err) {
-          if (err) reject(err);
-          else resolve({ id: this.lastID, ...orderData });
-        });
-    });
+      const stmt = db.prepare(`INSERT INTO orders (mad, drikke, ekstra_info, telefon) VALUES (?, ?, ?, ?)`);
+      const result = stmt.run(mad, drikke, ekstra_info, telefon);
+      return Promise.resolve({ id: result.lastInsertRowid, ...orderData });
+    } catch (err) {
+      return Promise.reject(err);
+    }
   },
 
   // Update order status
   updateOrderStatus: (id, status) => {
-    return new Promise((resolve, reject) => {
-      db.run(`UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
-        [status, id], function(err) {
-          if (err) reject(err);
-          else resolve({ id, status });
-        });
-    });
+    if (!db) return Promise.reject(new Error('Database not available'));
+    try {
+      const stmt = db.prepare(`UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`);
+      stmt.run(status, id);
+      return Promise.resolve({ id, status });
+    } catch (err) {
+      return Promise.reject(err);
+    }
   },
 
   // Get settings
   getSettings: () => {
-    return new Promise((resolve, reject) => {
-      db.all(`SELECT key, value FROM settings`, (err, rows) => {
-        if (err) reject(err);
-        else {
-          const settings = {};
-          rows.forEach(row => {
-            settings[row.key] = row.value;
-          });
-          resolve(settings);
-        }
+    if (!db) return Promise.resolve({});
+    try {
+      const stmt = db.prepare(`SELECT key, value FROM settings`);
+      const rows = stmt.all();
+      const settings = {};
+      rows.forEach(row => {
+        settings[row.key] = row.value;
       });
-    });
+      return Promise.resolve(settings);
+    } catch (err) {
+      return Promise.reject(err);
+    }
   },
 
   // Update setting
   updateSetting: (key, value) => {
-    return new Promise((resolve, reject) => {
-      db.run(`UPDATE settings SET value = ?, updated_at = CURRENT_TIMESTAMP WHERE key = ?`,
-        [value, key], function(err) {
-          if (err) reject(err);
-          else resolve({ key, value });
-        });
-    });
+    if (!db) return Promise.reject(new Error('Database not available'));
+    try {
+      const stmt = db.prepare(`UPDATE settings SET value = ?, updated_at = CURRENT_TIMESTAMP WHERE key = ?`);
+      stmt.run(value, key);
+      return Promise.resolve({ key, value });
+    } catch (err) {
+      return Promise.reject(err);
+    }
   }
 };
 
