@@ -21,6 +21,9 @@
     "nodemon": "^3.0.2"
   },
   "keywords": ["food-ordering", "danish", "express"],
-  "author": "",
-  "license": "MIT"
+  "author": "BareMelon",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
 } 
