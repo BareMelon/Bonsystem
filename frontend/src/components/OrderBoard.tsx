@@ -17,6 +17,7 @@ const OrderBoard: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [updatingOrder, setUpdatingOrder] = useState<number | null>(null);
 
   const fetchOrders = async () => {
     try {
@@ -37,11 +38,20 @@ const OrderBoard: React.FC = () => {
 
   const handleStatusUpdate = async (orderId: number, newStatus: string) => {
     try {
-      await orderAPI.updateOrderStatus(orderId, newStatus);
+      setUpdatingOrder(orderId);
+      console.log(`Updating order ${orderId} to status: ${newStatus}`);
+      console.log('Calling API...');
+      const result = await orderAPI.updateOrderStatus(orderId, newStatus);
+      console.log('API result:', result);
+      console.log('Status updated successfully');
       // Refresh orders after update
-      fetchOrders();
+      await fetchOrders();
     } catch (err) {
+      console.error('Status update error:', err);
+      console.error('Error details:', err);
       setError('Kunne ikke opdatere status');
+    } finally {
+      setUpdatingOrder(null);
     }
   };
 
@@ -142,8 +152,9 @@ const OrderBoard: React.FC = () => {
                   <button
                     className="action-btn primary"
                     onClick={() => handleStatusUpdate(order.id, getNextStatus(order.status)!)}
+                    disabled={updatingOrder === order.id}
                   >
-                    {getStatusText(getNextStatus(order.status)!)}
+                    {updatingOrder === order.id ? 'Opdaterer...' : getStatusText(getNextStatus(order.status)!)}
                   </button>
                 )}
                 
@@ -151,8 +162,9 @@ const OrderBoard: React.FC = () => {
                   <button
                     className="action-btn danger"
                     onClick={() => handleStatusUpdate(order.id, 'annulleret')}
+                    disabled={updatingOrder === order.id}
                   >
-                    Annuller
+                    {updatingOrder === order.id ? 'Opdaterer...' : 'Annuller'}
                   </button>
                 )}
               </div>

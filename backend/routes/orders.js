@@ -128,16 +128,21 @@ router.get('/:id', async (req, res) => {
 // PUT /api/orders/:id/status - Update order status
 router.put('/:id/status', async (req, res) => {
   try {
+    console.log('Status update request:', { id: req.params.id, body: req.body });
     const { status } = req.body;
     const validStatuses = ['ny', 'behandles', 'klar', 'afsendt', 'annulleret'];
 
     if (!validStatuses.includes(status)) {
+      console.log('Invalid status:', status);
       return res.status(400).json({
         error: 'Ugyldig status'
       });
     }
 
+    console.log('Updating order status...');
     const result = await dbHelpers.updateOrderStatus(req.params.id, status);
+    console.log('Status update result:', result);
+    
     res.json({
       success: true,
       message: 'Status opdateret',

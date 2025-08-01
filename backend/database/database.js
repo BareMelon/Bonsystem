@@ -39,13 +39,19 @@ const dbHelpers = {
 
   // Update order status
   updateOrderStatus: (id, status) => {
-    const order = orders.find(o => o.id === id);
+    console.log('Database: Updating order status', { id, status });
+    const order = orders.find(o => o.id === parseInt(id));
+    console.log('Found order:', order);
+    
     if (order) {
       order.status = status;
       order.updated_at = new Date().toISOString();
       console.log('Order status updated:', { id, status });
+      return Promise.resolve({ id, status });
+    } else {
+      console.log('Order not found:', id);
+      return Promise.reject(new Error('Order not found'));
     }
-    return Promise.resolve({ id, status });
   },
 
   // Get settings

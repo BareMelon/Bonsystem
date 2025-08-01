@@ -75,10 +75,14 @@ export const orderAPI = {
   },
   updateOrderStatus: async (id: number, status: string) => {
     try {
+      console.log(`API: Updating order ${id} to status ${status}`);
+      console.log(`API URL: ${API_BASE_URL}/orders/${id}/status`);
       const response = await api.put<OrderResponse>(`/orders/${id}/status`, { status });
+      console.log('API response:', response.data);
       return response.data;
     } catch (error) {
       console.error(`Fejl ved opdatering af status for bestilling ${id}:`, error);
+      console.error('API error details:', error.response?.data);
       throw new Error('Kunne ikke opdatere bestillingsstatus');
     }
   },

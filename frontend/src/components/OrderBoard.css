@@ -198,6 +198,17 @@
   background: #feb2b2;
 }
 
+.action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.action-btn:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
 .empty-state {
   text-align: center;
   padding: 3rem 1rem;
