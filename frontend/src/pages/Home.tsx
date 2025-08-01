@@ -39,11 +39,13 @@ const Home: React.FC = () => {
         setLoading(false);
       }
     };
+    
     loadMenuItems();
   }, []);
 
   const addToCart = (item: MenuItem, type: 'food' | 'drink') => {
     const existingItem = cart.find(cartItem => cartItem.id === item.id && cartItem.type === type);
+    
     if (existingItem) {
       setCart(cart.map(cartItem => 
         cartItem.id === item.id && cartItem.type === type
@@ -65,6 +67,7 @@ const Home: React.FC = () => {
 
   const removeFromCart = (itemId: number, type: 'food' | 'drink') => {
     const existingItem = cart.find(cartItem => cartItem.id === itemId && cartItem.type === type);
+    
     if (existingItem && existingItem.quantity > 1) {
       setCart(cart.map(cartItem => 
         cartItem.id === itemId && cartItem.type === type
@@ -93,24 +96,31 @@ const Home: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (cart.length === 0) {
       setMessage({ type: 'error', text: 'Du skal vælge mindst én ret eller drikke' });
       return;
     }
+    
     setIsSubmitting(true);
+    
     try {
       const foodItems = getFoodItems();
       const drinkItems = getDrinkItems();
+      
       const orderData = {
         mad: foodItems.map(item => `${item.name}${item.notes ? ` (${item.notes})` : ''}`).join(', '),
         drikke: drinkItems.map(item => `${item.name}${item.notes ? ` (${item.notes})` : ''}`).join(', '),
         ekstra_info: customerInfo.ekstra_info,
         telefon: customerInfo.telefon
       };
+
       await orderAPI.createOrder(orderData);
+      
       setMessage({ type: 'success', text: 'Bestilling modtaget! Tak for din bestilling.' });
       setCart([]);
       setCustomerInfo({ telefon: '', ekstra_info: '' });
+      
     } catch (error) {
       setMessage({ type: 'error', text: 'Der opstod en fejl ved afsendelse af bestillingen' });
     } finally {
@@ -120,12 +130,12 @@ const Home: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="container order-bg">
+      <div className="container">
         <div className="header">
           <h1 className="logo">me&ma</h1>
           <p className="tagline">Bestil mad og drikke online</p>
         </div>
-        <div className="order-card text-center">
+        <div className="card text-center">
           <p>Indlæser menu...</p>
         </div>
         <Footer />
@@ -134,91 +144,158 @@ const Home: React.FC = () => {
   }
 
   return (
-    <div className="container order-bg">
+    <div className="container">
       <div className="header">
-        <h1 className="logo restaurant-logo">me&ma</h1>
+        <div className="logo-container">
+          <h1 className="logo">me&ma</h1>
+          <div className="polkadot-rings">
+            <div className="ring ring-1"></div>
+            <div className="ring ring-2"></div>
+            <div className="ring ring-3"></div>
+          </div>
+        </div>
         <p className="tagline">Bestil mad og drikke online</p>
+        <div className="floating-dots">
+          <div className="floating-dot dot-1"></div>
+          <div className="floating-dot dot-2"></div>
+          <div className="floating-dot dot-3"></div>
+          <div className="floating-dot dot-4"></div>
+          <div className="floating-dot dot-5"></div>
+        </div>
       </div>
 
-      <div className="order-main-content">
-        <div className="allergen-banner minimal-banner">
+      <div className="main-content">
+        <div className="allergen-banner">
           <div className="allergen-icon">🍃</div>
           <p>Har du allergier eller særlige ønsker? Skriv det i noter eller spørg personalet</p>
         </div>
 
-        <section className="menu-section minimal-section">
-          <h2 className="section-title minimal-title">Vælg din mad</h2>
-          <div className="menu-grid minimal-menu-grid">
-            {foodItems.map(item => (
-              <div key={item.id} className="menu-item minimal-menu-item">
-                <div className="item-header-row">
-                  <div className="item-title-row">
-                    <span className="item-name minimal-item-name">{item.name}</span>
-                    <span className="item-price minimal-item-price">{item.price} kr</span>
+        <div className="menu-container">
+          <div className="menu-section food-section">
+            <h2 className="section-title">
+              <span className="emoji">🍽️</span>
+              Vælg din mad
+            </h2>
+            <div className="menu-grid">
+              {foodItems.map(item => (
+                <div key={item.id} className="menu-item">
+                  <div className="item-selector">
+                    <div 
+                      className={`circle-selector ${getFoodItems().find(cartItem => cartItem.id === item.id) ? 'selected' : ''}`}
+                      onClick={() => addToCart(item, 'food')}
+                    >
+                      {getFoodItems().find(cartItem => cartItem.id === item.id) && (
+                        <div className="checkmark">✓</div>
+                      )}
+                    </div>
+                    <div className="item-info">
+                      <h3>{item.name}</h3>
+                      <p>{item.description}</p>
+                      <span className="price">{item.price} kr</span>
+                    </div>
                   </div>
-                  <div className="item-desc minimal-item-desc">{item.description}</div>
+                  {getFoodItems().find(cartItem => cartItem.id === item.id) && (
+                    <div className="quantity-controls">
+                      <button 
+                        className="quantity-btn"
+                        onClick={() => removeFromCart(item.id, 'food')}
+                      >
+                        -
+                      </button>
+                      <span className="quantity">{getFoodItems().find(cartItem => cartItem.id === item.id)?.quantity || 0}</span>
+                      <button 
+                        className="quantity-btn"
+                        onClick={() => addToCart(item, 'food')}
+                      >
+                        +
+                      </button>
+                    </div>
+                  )}
                 </div>
-                <div className="item-actions-row">
-                  <button className="minimal-qty-btn" onClick={() => removeFromCart(item.id, 'food')} disabled={!getFoodItems().find(cartItem => cartItem.id === item.id)}>-</button>
-                  <span className="minimal-qty">{getFoodItems().find(cartItem => cartItem.id === item.id)?.quantity || 0}</span>
-                  <button className="minimal-qty-btn" onClick={() => addToCart(item, 'food')}>+</button>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </section>
 
-        <section className="menu-section minimal-section">
-          <h2 className="section-title minimal-title">Vælg dine drikke</h2>
-          <div className="menu-grid minimal-menu-grid">
-            {drinkItems.map(item => (
-              <div key={item.id} className="menu-item minimal-menu-item">
-                <div className="item-header-row">
-                  <div className="item-title-row">
-                    <span className="item-name minimal-item-name">{item.name}</span>
-                    <span className="item-price minimal-item-price">{item.price} kr</span>
+          <div className="menu-section drink-section">
+            <h2 className="section-title">
+              <span className="emoji">🥤</span>
+              Vælg dine drikke
+            </h2>
+            <div className="menu-grid">
+              {drinkItems.map(item => (
+                <div key={item.id} className="menu-item">
+                  <div className="item-selector">
+                    <div 
+                      className={`circle-selector ${getDrinkItems().find(cartItem => cartItem.id === item.id) ? 'selected' : ''}`}
+                      onClick={() => addToCart(item, 'drink')}
+                    >
+                      {getDrinkItems().find(cartItem => cartItem.id === item.id) && (
+                        <div className="checkmark">✓</div>
+                      )}
+                    </div>
+                    <div className="item-info">
+                      <h3>{item.name}</h3>
+                      <p>{item.description}</p>
+                      <span className="price">{item.price} kr</span>
+                    </div>
                   </div>
-                  <div className="item-desc minimal-item-desc">{item.description}</div>
+                  {getDrinkItems().find(cartItem => cartItem.id === item.id) && (
+                    <div className="quantity-controls">
+                      <button 
+                        className="quantity-btn"
+                        onClick={() => removeFromCart(item.id, 'drink')}
+                      >
+                        -
+                      </button>
+                      <span className="quantity">{getDrinkItems().find(cartItem => cartItem.id === item.id)?.quantity || 0}</span>
+                      <button 
+                        className="quantity-btn"
+                        onClick={() => addToCart(item, 'drink')}
+                      >
+                        +
+                      </button>
+                    </div>
+                  )}
                 </div>
-                <div className="item-actions-row">
-                  <button className="minimal-qty-btn" onClick={() => removeFromCart(item.id, 'drink')} disabled={!getDrinkItems().find(cartItem => cartItem.id === item.id)}>-</button>
-                  <span className="minimal-qty">{getDrinkItems().find(cartItem => cartItem.id === item.id)?.quantity || 0}</span>
-                  <button className="minimal-qty-btn" onClick={() => addToCart(item, 'drink')}>+</button>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </section>
+        </div>
 
         {cart.length > 0 && (
-          <section className="order-section minimal-order-section">
-            <h2 className="section-title minimal-title">Din bestilling</h2>
-            <div className="order-review minimal-order-review">
+          <div className="order-section">
+            <h2 className="section-title">
+              <span className="emoji">📋</span>
+              Din bestilling
+            </h2>
+            <div className="order-review">
               {cart.map(item => (
-                <div key={`${item.id}-${item.type}`} className="order-item minimal-order-item">
-                  <div className="item-details minimal-order-details">
-                    <div className="item-header minimal-order-header">
-                      <span className="item-name minimal-item-name">{item.name}</span>
-                      <span className="item-quantity minimal-item-quantity">x{item.quantity}</span>
-                      <span className="item-price minimal-item-price">{item.price * item.quantity} kr</span>
+                <div key={`${item.id}-${item.type}`} className="order-item">
+                  <div className="item-details">
+                    <div className="item-header">
+                      <h4>{item.name}</h4>
+                      <span className="item-quantity">x{item.quantity}</span>
                     </div>
-                    <div className="item-notes minimal-item-notes">
-                      <input
-                        type="text"
-                        placeholder="Tilføj noter (f.eks. 'ingen løg', 'ekstra ost')"
-                        value={item.notes}
-                        onChange={(e) => updateItemNotes(item.id, item.type, e.target.value)}
-                        className="notes-input minimal-notes-input"
-                      />
-                    </div>
+                    <div className="item-price">{item.price * item.quantity} kr</div>
+                  </div>
+                  <div className="item-notes">
+                    <input
+                      type="text"
+                      placeholder="Tilføj noter (f.eks. 'ingen løg', 'ekstra ost')"
+                      value={item.notes}
+                      onChange={(e) => updateItemNotes(item.id, item.type, e.target.value)}
+                      className="notes-input"
+                    />
                   </div>
                 </div>
               ))}
-              <div className="order-total minimal-order-total">
+              
+              <div className="order-total">
                 <h3>Total: {getCartTotal()} kr</h3>
               </div>
-              <div className="customer-info minimal-customer-info">
-                <h3>Kontaktoplysninger</h3>
+
+              <div className="customer-info">
+                <h3>📞 Kontaktoplysninger</h3>
                 <div className="form-group">
                   <label htmlFor="telefon">Telefonnummer</label>
                   <input
@@ -240,19 +317,25 @@ const Home: React.FC = () => {
                   />
                 </div>
               </div>
+
               <button 
-                className="btn submit-btn minimal-submit-btn"
+                className="btn submit-btn"
                 onClick={handleSubmit}
                 disabled={isSubmitting}
               >
                 {isSubmitting ? 'Sender...' : 'Send Bestilling'}
               </button>
             </div>
-          </section>
+          </div>
         )}
 
         {cart.length === 0 && (
-          <div className="empty-cart minimal-empty-cart">
+          <div className="empty-cart">
+            <div className="empty-dots">
+              <div className="empty-dot"></div>
+              <div className="empty-dot"></div>
+              <div className="empty-dot"></div>
+            </div>
             <p>Vælg mad og drikke fra menuen ovenfor</p>
           </div>
         )}
