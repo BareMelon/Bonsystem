@@ -85,7 +85,7 @@ const Admin: React.FC = () => {
 
       {/* Stats Overview */}
       {stats && (
-        <div className="card">
+        <div className="card admin-controls">
           <h2>Statistik</h2>
           <div className="stats-grid">
             <div className="stat-item">
@@ -117,7 +117,7 @@ const Admin: React.FC = () => {
       )}
 
       {/* Settings */}
-      <div className="card">
+      <div className="card settings-panel">
         <h2>Indstillinger</h2>
         
         <h3>Grundlæggende</h3>
