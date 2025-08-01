@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { adminAPI } from '../services/api';
 import OrderBoard from '../components/OrderBoard';
+import MenuManager from '../components/MenuManager';
 import './Admin.css';
 
 interface Settings {
@@ -188,6 +189,12 @@ const Admin: React.FC = () => {
       <div className="card">
         <h2>Bestillinger</h2>
         <OrderBoard />
+      </div>
+
+      {/* Menu Management */}
+      <div className="card">
+        <h2>Menu Styring</h2>
+        <MenuManager />
       </div>
 
       <div className="admin-link">

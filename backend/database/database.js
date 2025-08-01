@@ -11,6 +11,21 @@ let settings = [
   { key: 'twilio_phone_number', value: '+17756405975' }
 ];
 
+// Menu items
+let foodItems = [
+  { id: 1, name: 'Pizza Margherita', description: 'Tomat, mozzarella, basilikum', price: 89, available: true },
+  { id: 2, name: 'Burger Classic', description: 'Oksekød, salat, tomat, agurk', price: 95, available: true },
+  { id: 3, name: 'Pasta Carbonara', description: 'Bacon, æg, parmesan', price: 79, available: true },
+  { id: 4, name: 'Caesar Salat', description: 'Kylling, parmesan, croutoner', price: 69, available: true }
+];
+
+let drinkItems = [
+  { id: 1, name: 'Coca Cola', description: '33cl dåse', price: 25, available: true },
+  { id: 2, name: 'Øl Tuborg', description: '33cl flaske', price: 35, available: true },
+  { id: 3, name: 'Vand', description: '50cl flaske', price: 20, available: true },
+  { id: 4, name: 'Kaffe', description: 'Friskbrygget', price: 30, available: true }
+];
+
 // Helper functions for database operations
 const dbHelpers = {
   // Get all orders
@@ -73,6 +88,79 @@ const dbHelpers = {
     }
     console.log('Setting updated:', { key, value });
     return Promise.resolve({ key, value });
+  },
+
+  // Menu items functions
+  getAllFoodItems: () => {
+    return Promise.resolve(foodItems.filter(item => item.available));
+  },
+
+  getAllDrinkItems: () => {
+    return Promise.resolve(drinkItems.filter(item => item.available));
+  },
+
+  getFoodItem: (id) => {
+    return Promise.resolve(foodItems.find(item => item.id === parseInt(id)));
+  },
+
+  getDrinkItem: (id) => {
+    return Promise.resolve(drinkItems.find(item => item.id === parseInt(id)));
+  },
+
+  createFoodItem: (itemData) => {
+    const newItem = {
+      id: Math.max(...foodItems.map(f => f.id), 0) + 1,
+      ...itemData,
+      available: true
+    };
+    foodItems.push(newItem);
+    return Promise.resolve(newItem);
+  },
+
+  createDrinkItem: (itemData) => {
+    const newItem = {
+      id: Math.max(...drinkItems.map(d => d.id), 0) + 1,
+      ...itemData,
+      available: true
+    };
+    drinkItems.push(newItem);
+    return Promise.resolve(newItem);
+  },
+
+  updateFoodItem: (id, itemData) => {
+    const item = foodItems.find(f => f.id === parseInt(id));
+    if (item) {
+      Object.assign(item, itemData);
+      return Promise.resolve(item);
+    }
+    return Promise.reject(new Error('Food item not found'));
+  },
+
+  updateDrinkItem: (id, itemData) => {
+    const item = drinkItems.find(d => d.id === parseInt(id));
+    if (item) {
+      Object.assign(item, itemData);
+      return Promise.resolve(item);
+    }
+    return Promise.reject(new Error('Drink item not found'));
+  },
+
+  deleteFoodItem: (id) => {
+    const item = foodItems.find(f => f.id === parseInt(id));
+    if (item) {
+      item.available = false;
+      return Promise.resolve({ success: true });
+    }
+    return Promise.reject(new Error('Food item not found'));
+  },
+
+  deleteDrinkItem: (id) => {
+    const item = drinkItems.find(d => d.id === parseInt(id));
+    if (item) {
+      item.available = false;
+      return Promise.resolve({ success: true });
+    }
+    return Promise.reject(new Error('Drink item not found'));
   }
 };
 

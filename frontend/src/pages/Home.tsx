@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { orderAPI } from '../services/api';
+import React, { useState, useEffect } from 'react';
+import { orderAPI, menuAPI, MenuItem } from '../services/api';
 import './Home.css';
 
 const Home: React.FC = () => {
@@ -11,8 +11,30 @@ const Home: React.FC = () => {
   });
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [foodItems, setFoodItems] = useState<MenuItem[]>([]);
+  const [drinkItems, setDrinkItems] = useState<MenuItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  useEffect(() => {
+    const loadMenuItems = async () => {
+      try {
+        const [food, drinks] = await Promise.all([
+          menuAPI.getFoodItems(),
+          menuAPI.getDrinkItems()
+        ]);
+        setFoodItems(food);
+        setDrinkItems(drinks);
+      } catch (error) {
+        console.error('Failed to load menu items:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadMenuItems();
+  }, []);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -50,31 +72,56 @@ const Home: React.FC = () => {
       </div>
 
       <div className="card">
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="mad">Mad *</label>
-            <input
-              type="text"
-              id="mad"
-              name="mad"
-              value={formData.mad}
-              onChange={handleInputChange}
-              placeholder="Hvad vil du bestille?"
-              required
-            />
+        {loading ? (
+          <div className="text-center">
+            <p>Indlæser menu...</p>
           </div>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="mad">Mad *</label>
+              <select
+                id="mad"
+                name="mad"
+                value={formData.mad}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Vælg mad</option>
+                {foodItems.map(item => (
+                  <option key={item.id} value={item.name}>
+                    {item.name} - {item.price} kr
+                  </option>
+                ))}
+              </select>
+              {formData.mad && (
+                <div className="item-description">
+                  {foodItems.find(item => item.name === formData.mad)?.description}
+                </div>
+              )}
+            </div>
 
-          <div className="form-group">
-            <label htmlFor="drikke">Drikke</label>
-            <input
-              type="text"
-              id="drikke"
-              name="drikke"
-              value={formData.drikke}
-              onChange={handleInputChange}
-              placeholder="Evt. drikke til maden"
-            />
-          </div>
+            <div className="form-group">
+              <label htmlFor="drikke">Drikke</label>
+              <select
+                id="drikke"
+                name="drikke"
+                value={formData.drikke}
+                onChange={handleInputChange}
+              >
+                <option value="">Vælg drikke (valgfrit)</option>
+                {drinkItems.map(item => (
+                  <option key={item.id} value={item.name}>
+                    {item.name} - {item.price} kr
+                  </option>
+                ))}
+              </select>
+              {formData.drikke && (
+                <div className="item-description">
+                  {drinkItems.find(item => item.name === formData.drikke)?.description}
+                </div>
+              )}
+            </div>
 
           <div className="form-group">
             <label htmlFor="ekstra_info">Ekstra info</label>
@@ -105,15 +152,16 @@ const Home: React.FC = () => {
             className="btn" 
             disabled={isSubmitting}
             style={{ width: '100%' }}
-          >
-            {isSubmitting ? 'Sender...' : 'Send Bestilling'}
-          </button>
-        </form>
+                      >
+              {isSubmitting ? 'Sender...' : 'Send Bestilling'}
+            </button>
 
-        {message && (
-          <div className={`message ${message.type}`}>
-            {message.text}
-          </div>
+            {message && (
+              <div className={`message ${message.type}`}>
+                {message.text}
+              </div>
+            )}
+          </form>
         )}
       </div>
 

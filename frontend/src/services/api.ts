@@ -44,6 +44,14 @@ export interface Stats {
   cancelledOrders: number;
 }
 
+export interface MenuItem {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  available: boolean;
+}
+
 // Order API
 export const orderAPI = {
   createOrder: async (order: { mad: string; drikke?: string; ekstra_info?: string; telefon?: string }) => {
@@ -124,6 +132,82 @@ export const adminAPI = {
     } catch (error) {
       console.error(`Fejl ved sletning af bestilling ${id}:`, error);
       throw new Error('Kunne ikke slette bestilling');
+    }
+  },
+};
+
+// Menu API
+export const menuAPI = {
+  getFoodItems: async () => {
+    try {
+      const response = await api.get<{ success: boolean; items: MenuItem[] }>('/menu/food');
+      return response.data.items;
+    } catch (error) {
+      console.error('Fejl ved hentning af mad:', error);
+      throw new Error('Kunne ikke hente mad');
+    }
+  },
+  getDrinkItems: async () => {
+    try {
+      const response = await api.get<{ success: boolean; items: MenuItem[] }>('/menu/drinks');
+      return response.data.items;
+    } catch (error) {
+      console.error('Fejl ved hentning af drikke:', error);
+      throw new Error('Kunne ikke hente drikke');
+    }
+  },
+  createFoodItem: async (item: { name: string; description: string; price: number }) => {
+    try {
+      const response = await api.post<{ success: boolean; item: MenuItem }>('/menu/food', item);
+      return response.data.item;
+    } catch (error) {
+      console.error('Fejl ved oprettelse af mad:', error);
+      throw new Error('Kunne ikke oprette mad');
+    }
+  },
+  createDrinkItem: async (item: { name: string; description: string; price: number }) => {
+    try {
+      const response = await api.post<{ success: boolean; item: MenuItem }>('/menu/drinks', item);
+      return response.data.item;
+    } catch (error) {
+      console.error('Fejl ved oprettelse af drikke:', error);
+      throw new Error('Kunne ikke oprette drikke');
+    }
+  },
+  updateFoodItem: async (id: number, item: Partial<MenuItem>) => {
+    try {
+      const response = await api.put<{ success: boolean; item: MenuItem }>(`/menu/food/${id}`, item);
+      return response.data.item;
+    } catch (error) {
+      console.error('Fejl ved opdatering af mad:', error);
+      throw new Error('Kunne ikke opdatere mad');
+    }
+  },
+  updateDrinkItem: async (id: number, item: Partial<MenuItem>) => {
+    try {
+      const response = await api.put<{ success: boolean; item: MenuItem }>(`/menu/drinks/${id}`, item);
+      return response.data.item;
+    } catch (error) {
+      console.error('Fejl ved opdatering af drikke:', error);
+      throw new Error('Kunne ikke opdatere drikke');
+    }
+  },
+  deleteFoodItem: async (id: number) => {
+    try {
+      const response = await api.delete<{ success: boolean }>(`/menu/food/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Fejl ved sletning af mad:', error);
+      throw new Error('Kunne ikke slette mad');
+    }
+  },
+  deleteDrinkItem: async (id: number) => {
+    try {
+      const response = await api.delete<{ success: boolean }>(`/menu/drinks/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Fejl ved sletning af drikke:', error);
+      throw new Error('Kunne ikke slette drikke');
     }
   },
 }; 

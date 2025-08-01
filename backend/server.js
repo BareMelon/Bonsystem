@@ -56,6 +56,7 @@ try {
 if (db) {
   app.use('/api/orders', require('./routes/orders'));
   app.use('/api/admin', require('./routes/admin'));
+  app.use('/api/menu', require('./routes/menu'));
 } else {
   console.log('Skipping routes due to database error');
 }
