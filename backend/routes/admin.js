@@ -37,10 +37,14 @@ router.get('/settings', async (req, res) => {
 // PUT /api/admin/settings - Update settings
 router.put('/settings', async (req, res) => {
   try {
-    const { restaurant_name } = req.body;
+    const { restaurant_name, admin_phone, twilio_account_sid, twilio_auth_token, twilio_phone_number } = req.body;
 
     const updates = [];
-    if (restaurant_name) updates.push(dbHelpers.updateSetting('restaurant_name', restaurant_name));
+    if (restaurant_name !== undefined) updates.push(dbHelpers.updateSetting('restaurant_name', restaurant_name));
+    if (admin_phone !== undefined) updates.push(dbHelpers.updateSetting('admin_phone', admin_phone));
+    if (twilio_account_sid !== undefined) updates.push(dbHelpers.updateSetting('twilio_account_sid', twilio_account_sid));
+    if (twilio_auth_token !== undefined) updates.push(dbHelpers.updateSetting('twilio_auth_token', twilio_auth_token));
+    if (twilio_phone_number !== undefined) updates.push(dbHelpers.updateSetting('twilio_phone_number', twilio_phone_number));
 
     await Promise.all(updates);
 

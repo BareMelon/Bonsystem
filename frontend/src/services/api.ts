@@ -29,6 +29,10 @@ export interface OrderResponse {
 
 export interface Settings {
   restaurant_name?: string;
+  admin_phone?: string;
+  twilio_account_sid?: string;
+  twilio_auth_token?: string;
+  twilio_phone_number?: string;
 }
 
 export interface Stats {

@@ -4,7 +4,11 @@ console.log('Using in-memory database for Railway');
 // In-memory storage
 let orders = [];
 let settings = [
-  { key: 'restaurant_name', value: 'me&ma' }
+  { key: 'restaurant_name', value: 'me&ma' },
+  { key: 'admin_phone', value: '' },
+  { key: 'twilio_account_sid', value: '' },
+  { key: 'twilio_auth_token', value: '' },
+  { key: 'twilio_phone_number', value: '' }
 ];
 
 // Helper functions for database operations

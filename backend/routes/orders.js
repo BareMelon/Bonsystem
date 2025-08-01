@@ -2,6 +2,55 @@ const express = require('express');
 const router = express.Router();
 const { dbHelpers } = require('../database/database');
 
+// Twilio setup
+let twilioClient = null;
+let adminPhone = null;
+
+try {
+  if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER) {
+    const twilio = require('twilio');
+    twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+    adminPhone = process.env.ADMIN_PHONE;
+    console.log('Twilio initialized successfully');
+  } else {
+    console.log('Twilio not configured - SMS notifications disabled');
+  }
+} catch (error) {
+  console.error('Twilio initialization failed:', error);
+}
+
+// SMS notification function
+const sendSMSNotification = async (orderData) => {
+  if (!twilioClient || !adminPhone) {
+    console.log('SMS not sent - Twilio not configured');
+    return false;
+  }
+
+  try {
+    const message = `🍽️ NY BESTILLING - me&ma
+
+Mad: ${orderData.mad}
+${orderData.drikke ? `Drikke: ${orderData.drikke}` : ''}
+${orderData.ekstra_info ? `Ekstra: ${orderData.ekstra_info}` : ''}
+${orderData.telefon ? `Telefon: ${orderData.telefon}` : ''}
+
+Bestilling #${orderData.id}
+Tid: ${new Date().toLocaleString('da-DK')}`;
+
+    await twilioClient.messages.create({
+      body: message,
+      from: process.env.TWILIO_PHONE_NUMBER,
+      to: adminPhone
+    });
+
+    console.log(`SMS sent to ${adminPhone} for order #${orderData.id}`);
+    return true;
+  } catch (error) {
+    console.error('Failed to send SMS:', error);
+    return false;
+  }
+};
+
 // POST /api/orders - Create new order
 router.post('/', async (req, res) => {
   try {
@@ -21,6 +70,9 @@ router.post('/', async (req, res) => {
       ekstra_info: ekstra_info || '',
       telefon: telefon || ''
     });
+
+    // Send SMS notification
+    await sendSMSNotification(orderData);
 
     res.status(201).json({
       success: true,

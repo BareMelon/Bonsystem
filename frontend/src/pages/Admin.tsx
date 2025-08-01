@@ -5,6 +5,10 @@ import './Admin.css';
 
 interface Settings {
   restaurant_name?: string;
+  admin_phone?: string;
+  twilio_account_sid?: string;
+  twilio_auth_token?: string;
+  twilio_phone_number?: string;
 }
 
 interface Stats {
@@ -114,6 +118,8 @@ const Admin: React.FC = () => {
       {/* Settings */}
       <div className="card">
         <h2>Indstillinger</h2>
+        
+        <h3>Grundlæggende</h3>
         <div className="form-group">
           <label htmlFor="restaurant_name">Restaurant Navn</label>
           <input
@@ -124,6 +130,52 @@ const Admin: React.FC = () => {
             placeholder="me&ma"
           />
         </div>
+
+        <h3>SMS Notifikationer (Twilio)</h3>
+        <div className="form-group">
+          <label htmlFor="admin_phone">Admin Telefon</label>
+          <input
+            type="tel"
+            id="admin_phone"
+            value={settings.admin_phone || ''}
+            onChange={(e) => setSettings({ ...settings, admin_phone: e.target.value })}
+            placeholder="+45 12 34 56 78"
+          />
+        </div>
+        
+        <div className="form-group">
+          <label htmlFor="twilio_account_sid">Twilio Account SID</label>
+          <input
+            type="text"
+            id="twilio_account_sid"
+            value={settings.twilio_account_sid || ''}
+            onChange={(e) => setSettings({ ...settings, twilio_account_sid: e.target.value })}
+            placeholder="AC..."
+          />
+        </div>
+        
+        <div className="form-group">
+          <label htmlFor="twilio_auth_token">Twilio Auth Token</label>
+          <input
+            type="password"
+            id="twilio_auth_token"
+            value={settings.twilio_auth_token || ''}
+            onChange={(e) => setSettings({ ...settings, twilio_auth_token: e.target.value })}
+            placeholder="Auth Token"
+          />
+        </div>
+        
+        <div className="form-group">
+          <label htmlFor="twilio_phone_number">Twilio Telefon</label>
+          <input
+            type="tel"
+            id="twilio_phone_number"
+            value={settings.twilio_phone_number || ''}
+            onChange={(e) => setSettings({ ...settings, twilio_phone_number: e.target.value })}
+            placeholder="+1234567890"
+          />
+        </div>
+
         <button 
           className="btn" 
           onClick={() => handleSettingsUpdate(settings)}
