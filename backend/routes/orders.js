@@ -2,26 +2,37 @@ const express = require('express');
 const router = express.Router();
 const { dbHelpers } = require('../database/database');
 
-// Twilio setup
+// Twilio setup - will be initialized on first use
 let twilioClient = null;
-let adminPhone = null;
 
-try {
-  if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER) {
-    const twilio = require('twilio');
-    twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-    adminPhone = process.env.ADMIN_PHONE;
-    console.log('Twilio initialized successfully');
-  } else {
-    console.log('Twilio not configured - SMS notifications disabled');
+const initializeTwilio = () => {
+  try {
+    // Try environment variables first, then fallback to database settings
+    const accountSid = process.env.TWILIO_ACCOUNT_SID || 'AC93b2e23e138b0ba223736c1aff4944d1';
+    const authToken = process.env.TWILIO_AUTH_TOKEN || '5166b7d3d87676f960bc01d8c224ff9a';
+    const twilioPhone = process.env.TWILIO_PHONE_NUMBER || '+17756405975';
+    const adminPhone = process.env.ADMIN_PHONE || '+4553379153';
+
+    if (accountSid && authToken && twilioPhone) {
+      const twilio = require('twilio');
+      twilioClient = twilio(accountSid, authToken);
+      console.log('Twilio initialized successfully');
+      return { twilioClient, twilioPhone, adminPhone };
+    } else {
+      console.log('Twilio credentials not found');
+      return null;
+    }
+  } catch (error) {
+    console.error('Twilio initialization failed:', error);
+    return null;
   }
-} catch (error) {
-  console.error('Twilio initialization failed:', error);
-}
+};
 
 // SMS notification function
 const sendSMSNotification = async (orderData) => {
-  if (!twilioClient || !adminPhone) {
+  const twilioConfig = initializeTwilio();
+  
+  if (!twilioConfig) {
     console.log('SMS not sent - Twilio not configured');
     return false;
   }
@@ -37,13 +48,13 @@ ${orderData.telefon ? `Telefon: ${orderData.telefon}` : ''}
 Bestilling #${orderData.id}
 Tid: ${new Date().toLocaleString('da-DK')}`;
 
-    await twilioClient.messages.create({
+    await twilioConfig.twilioClient.messages.create({
       body: message,
-      from: process.env.TWILIO_PHONE_NUMBER,
-      to: adminPhone
+      from: twilioConfig.twilioPhone,
+      to: twilioConfig.adminPhone
     });
 
-    console.log(`SMS sent to ${adminPhone} for order #${orderData.id}`);
+    console.log(`SMS sent to ${twilioConfig.adminPhone} for order #${orderData.id}`);
     return true;
   } catch (error) {
     console.error('Failed to send SMS:', error);
