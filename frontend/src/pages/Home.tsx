@@ -146,108 +146,128 @@ const Home: React.FC = () => {
   return (
     <div className="container">
       <div className="header">
-        <h1 className="logo">me&ma</h1>
+        <div className="logo-container">
+          <h1 className="logo">me&ma</h1>
+          <div className="polkadot-rings">
+            <div className="ring ring-1"></div>
+            <div className="ring ring-2"></div>
+            <div className="ring ring-3"></div>
+          </div>
+        </div>
         <p className="tagline">Bestil mad og drikke online</p>
-        <div className="polkadot-decoration">
-          <div className="dot"></div>
-          <div className="dot"></div>
-          <div className="dot"></div>
+        <div className="floating-dots">
+          <div className="floating-dot dot-1"></div>
+          <div className="floating-dot dot-2"></div>
+          <div className="floating-dot dot-3"></div>
+          <div className="floating-dot dot-4"></div>
+          <div className="floating-dot dot-5"></div>
         </div>
       </div>
 
-      <div className="card">
-        <div className="allergen-notice">
-          <div className="allergen-icon">⚠️</div>
-          <p>Spørgsmål til allergener? Henvend dig til personalet</p>
+      <div className="main-content">
+        <div className="allergen-banner">
+          <div className="allergen-icon">🍃</div>
+          <p>Har du allergier eller særlige ønsker? Skriv det i noter eller spørg personalet</p>
         </div>
 
-        <h2>🍽️ Vælg din mad</h2>
-        <div className="menu-section">
-          <div className="menu-grid">
-            {foodItems.map(item => (
-              <div key={item.id} className="menu-item">
-                <div className="item-selector">
-                  <div 
-                    className={`circle-selector ${getFoodItems().find(cartItem => cartItem.id === item.id) ? 'selected' : ''}`}
-                    onClick={() => addToCart(item, 'food')}
-                  >
-                    {getFoodItems().find(cartItem => cartItem.id === item.id) && (
-                      <div className="checkmark">✓</div>
-                    )}
-                  </div>
-                  <div className="item-info">
-                    <h3>{item.name}</h3>
-                    <p>{item.description}</p>
-                    <span className="price">{item.price} kr</span>
-                  </div>
-                </div>
-                {getFoodItems().find(cartItem => cartItem.id === item.id) && (
-                  <div className="quantity-controls">
-                    <button 
-                      className="quantity-btn"
-                      onClick={() => removeFromCart(item.id, 'food')}
-                    >
-                      -
-                    </button>
-                    <span className="quantity">{getFoodItems().find(cartItem => cartItem.id === item.id)?.quantity || 0}</span>
-                    <button 
-                      className="quantity-btn"
+        <div className="menu-container">
+          <div className="menu-section food-section">
+            <h2 className="section-title">
+              <span className="emoji">🍽️</span>
+              Vælg din mad
+            </h2>
+            <div className="menu-grid">
+              {foodItems.map(item => (
+                <div key={item.id} className="menu-item">
+                  <div className="item-selector">
+                    <div 
+                      className={`circle-selector ${getFoodItems().find(cartItem => cartItem.id === item.id) ? 'selected' : ''}`}
                       onClick={() => addToCart(item, 'food')}
                     >
-                      +
-                    </button>
+                      {getFoodItems().find(cartItem => cartItem.id === item.id) && (
+                        <div className="checkmark">✓</div>
+                      )}
+                    </div>
+                    <div className="item-info">
+                      <h3>{item.name}</h3>
+                      <p>{item.description}</p>
+                      <span className="price">{item.price} kr</span>
+                    </div>
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <h2>🥤 Vælg dine drikke</h2>
-        <div className="menu-section">
-          <div className="menu-grid">
-            {drinkItems.map(item => (
-              <div key={item.id} className="menu-item">
-                <div className="item-selector">
-                  <div 
-                    className={`circle-selector ${getDrinkItems().find(cartItem => cartItem.id === item.id) ? 'selected' : ''}`}
-                    onClick={() => addToCart(item, 'drink')}
-                  >
-                    {getDrinkItems().find(cartItem => cartItem.id === item.id) && (
-                      <div className="checkmark">✓</div>
-                    )}
-                  </div>
-                  <div className="item-info">
-                    <h3>{item.name}</h3>
-                    <p>{item.description}</p>
-                    <span className="price">{item.price} kr</span>
-                  </div>
+                  {getFoodItems().find(cartItem => cartItem.id === item.id) && (
+                    <div className="quantity-controls">
+                      <button 
+                        className="quantity-btn"
+                        onClick={() => removeFromCart(item.id, 'food')}
+                      >
+                        -
+                      </button>
+                      <span className="quantity">{getFoodItems().find(cartItem => cartItem.id === item.id)?.quantity || 0}</span>
+                      <button 
+                        className="quantity-btn"
+                        onClick={() => addToCart(item, 'food')}
+                      >
+                        +
+                      </button>
+                    </div>
+                  )}
                 </div>
-                {getDrinkItems().find(cartItem => cartItem.id === item.id) && (
-                  <div className="quantity-controls">
-                    <button 
-                      className="quantity-btn"
-                      onClick={() => removeFromCart(item.id, 'drink')}
-                    >
-                      -
-                    </button>
-                    <span className="quantity">{getDrinkItems().find(cartItem => cartItem.id === item.id)?.quantity || 0}</span>
-                    <button 
-                      className="quantity-btn"
+              ))}
+            </div>
+          </div>
+
+          <div className="menu-section drink-section">
+            <h2 className="section-title">
+              <span className="emoji">🥤</span>
+              Vælg dine drikke
+            </h2>
+            <div className="menu-grid">
+              {drinkItems.map(item => (
+                <div key={item.id} className="menu-item">
+                  <div className="item-selector">
+                    <div 
+                      className={`circle-selector ${getDrinkItems().find(cartItem => cartItem.id === item.id) ? 'selected' : ''}`}
                       onClick={() => addToCart(item, 'drink')}
                     >
-                      +
-                    </button>
+                      {getDrinkItems().find(cartItem => cartItem.id === item.id) && (
+                        <div className="checkmark">✓</div>
+                      )}
+                    </div>
+                    <div className="item-info">
+                      <h3>{item.name}</h3>
+                      <p>{item.description}</p>
+                      <span className="price">{item.price} kr</span>
+                    </div>
                   </div>
-                )}
-              </div>
-            ))}
+                  {getDrinkItems().find(cartItem => cartItem.id === item.id) && (
+                    <div className="quantity-controls">
+                      <button 
+                        className="quantity-btn"
+                        onClick={() => removeFromCart(item.id, 'drink')}
+                      >
+                        -
+                      </button>
+                      <span className="quantity">{getDrinkItems().find(cartItem => cartItem.id === item.id)?.quantity || 0}</span>
+                      <button 
+                        className="quantity-btn"
+                        onClick={() => addToCart(item, 'drink')}
+                      >
+                        +
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
         {cart.length > 0 && (
-          <>
-            <h2>📋 Din bestilling</h2>
+          <div className="order-section">
+            <h2 className="section-title">
+              <span className="emoji">📋</span>
+              Din bestilling
+            </h2>
             <div className="order-review">
               {cart.map(item => (
                 <div key={`${item.id}-${item.type}`} className="order-item">
@@ -296,10 +316,6 @@ const Home: React.FC = () => {
                     rows={3}
                   />
                 </div>
-                <div className="allergen-reminder">
-                  <div className="allergen-icon-small">⚠️</div>
-                  <p>Husk at informere om allergier i noter eller til personalet</p>
-                </div>
               </div>
 
               <button 
@@ -310,15 +326,15 @@ const Home: React.FC = () => {
                 {isSubmitting ? 'Sender...' : 'Send Bestilling'}
               </button>
             </div>
-          </>
+          </div>
         )}
 
         {cart.length === 0 && (
           <div className="empty-cart">
-            <div className="polkadot-decoration-small">
-              <div className="dot-small"></div>
-              <div className="dot-small"></div>
-              <div className="dot-small"></div>
+            <div className="empty-dots">
+              <div className="empty-dot"></div>
+              <div className="empty-dot"></div>
+              <div className="empty-dot"></div>
             </div>
             <p>Vælg mad og drikke fra menuen ovenfor</p>
           </div>
@@ -366,8 +382,8 @@ const Footer: React.FC = () => {
           <h4>me&ma</h4>
           <p>Bestil mad og drikke online</p>
           <div className="allergen-info">
-            <div className="allergen-icon-small">⚠️</div>
-            <p>Spørgsmål til allergener? Henvend dig til personalet</p>
+            <div className="allergen-icon-small">🍃</div>
+            <p>Har du allergier? Skriv det i noter eller spørg personalet</p>
           </div>
           <p className="copyright">© 2024 me&ma. Alle rettigheder forbeholdes.</p>
         </div>

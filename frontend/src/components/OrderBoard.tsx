@@ -5,28 +5,43 @@ import './OrderBoard.css';
 interface Order {
   id: number;
   mad: string;
-  drikke?: string;
-  ekstra_info?: string;
-  telefon?: string;
-  status: 'ny' | 'behandles' | 'klar' | 'afsendt' | 'annulleret';
-  created_at: string;
-  updated_at: string;
+  drikke: string;
+  ekstra_info: string;
+  telefon: string;
+  status: string;
+  timestamp: string;
 }
 
 const OrderBoard: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [updatingOrder, setUpdatingOrder] = useState<number | null>(null);
+  const [lastOrderCount, setLastOrderCount] = useState(0);
+
+  // Sound notification
+  const playNotificationSound = () => {
+    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT');
+    audio.volume = 0.3;
+    audio.play().catch(() => {
+      // Fallback for browsers that don't support audio
+      console.log('Notification sound played');
+    });
+  };
 
   const fetchOrders = async () => {
     try {
-      setLoading(true);
-      const ordersData = await orderAPI.getAllOrders();
-      setOrders(ordersData);
-      setError(null);
-    } catch (err) {
-      setError('Kunne ikke hente bestillinger');
+      const response = await orderAPI.getOrders();
+      const newOrders = response.orders || [];
+      
+      // Check if there are new orders
+      if (newOrders.length > lastOrderCount && lastOrderCount > 0) {
+        playNotificationSound();
+      }
+      
+      setOrders(newOrders);
+      setLastOrderCount(newOrders.length);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
     } finally {
       setLoading(false);
     }
@@ -34,73 +49,98 @@ const OrderBoard: React.FC = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+    
+    // Auto-refresh every 10 seconds
+    const interval = setInterval(fetchOrders, 10000);
+    
+    return () => clearInterval(interval);
+  }, [lastOrderCount]);
 
-  const handleStatusUpdate = async (orderId: number, newStatus: string) => {
+  const handleStatusUpdate = async (id: number, newStatus: string) => {
+    setUpdatingOrder(id);
+    
     try {
-      setUpdatingOrder(orderId);
-      console.log(`Updating order ${orderId} to status: ${newStatus}`);
-      console.log('Calling API...');
-      const result = await orderAPI.updateOrderStatus(orderId, newStatus);
-      console.log('API result:', result);
-      console.log('Status updated successfully');
-      // Refresh orders after update
-      await fetchOrders();
-    } catch (err) {
-      console.error('Status update error:', err);
-      console.error('Error details:', err);
-      setError('Kunne ikke opdatere status');
+      await orderAPI.updateOrderStatus(id, newStatus);
+      
+      // Update local state
+      setOrders(prevOrders => 
+        prevOrders.map(order => 
+          order.id === id 
+            ? { ...order, status: newStatus }
+            : order
+        )
+      );
+      
+      console.log(`Order ${id} status updated to ${newStatus}`);
+    } catch (error) {
+      console.error(`Error updating order ${id} status:`, error);
     } finally {
       setUpdatingOrder(null);
     }
   };
 
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString('da-DK', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'ny': return '#3b82f6'; // blue
+      case 'behandles': return '#f59e0b'; // amber
+      case 'klar': return '#10b981'; // green
+      case 'afsendt': return '#8b5cf6'; // purple
+      case 'annulleret': return '#ef4444'; // red
+      default: return '#6b7280'; // gray
+    }
   };
 
   const getStatusText = (status: string) => {
-    const statusMap: { [key: string]: string } = {
-      'ny': 'Ny',
-      'behandles': 'Behandles',
-      'klar': 'Klar',
-      'afsendt': 'Afsendt',
-      'annulleret': 'Annulleret'
-    };
-    return statusMap[status] || status;
+    switch (status) {
+      case 'ny': return 'Ny';
+      case 'behandles': return 'Behandles';
+      case 'klar': return 'Klar';
+      case 'afsendt': return 'Afsendt';
+      case 'annulleret': return 'Annulleret';
+      default: return status;
+    }
   };
 
-  const getNextStatus = (currentStatus: string) => {
-    const statusFlow: { [key: string]: string } = {
-      'ny': 'behandles',
-      'behandles': 'klar',
-      'klar': 'afsendt'
-    };
-    return statusFlow[currentStatus];
+  const canRevertStatus = (status: string) => {
+    return ['behandles', 'klar', 'afsendt', 'annulleret'].includes(status);
+  };
+
+  const getPreviousStatus = (currentStatus: string) => {
+    switch (currentStatus) {
+      case 'behandles': return 'ny';
+      case 'klar': return 'behandles';
+      case 'afsendt': return 'klar';
+      case 'annulleret': return 'ny';
+      default: return 'ny';
+    }
   };
 
   if (loading) {
     return (
       <div className="order-board">
-        <div className="loading-state">
+        <div className="loading-message">
+          <div className="loading-dots">
+            <div className="loading-dot"></div>
+            <div className="loading-dot"></div>
+            <div className="loading-dot"></div>
+          </div>
           <p>Indlæser bestillinger...</p>
         </div>
       </div>
     );
   }
 
-  if (error) {
+  if (orders.length === 0) {
     return (
       <div className="order-board">
-        <div className="empty-state">
-          <p>{error}</p>
-          <button className="btn" onClick={fetchOrders}>
-            Prøv igen
-          </button>
+        <div className="empty-board">
+          <div className="empty-dots">
+            <div className="empty-dot"></div>
+            <div className="empty-dot"></div>
+            <div className="empty-dot"></div>
+          </div>
+          <h3>Ingen bestillinger endnu</h3>
+          <p>Når der kommer nye bestillinger, vil de vises her</p>
         </div>
       </div>
     );
@@ -108,70 +148,139 @@ const OrderBoard: React.FC = () => {
 
   return (
     <div className="order-board">
-      <div className="order-board-header">
-        <h2 className="order-board-title">Bestillinger</h2>
-        <button className="refresh-btn" onClick={fetchOrders}>
-          Opdater
-        </button>
-      </div>
-
-      {orders.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-state-icon">📝</div>
-          <h3>Ingen bestillinger endnu</h3>
-          <p>Når kunder bestiller, vises de her som sticky notes</p>
+      <div className="board-header">
+        <h2>Bestillings Oversigt</h2>
+        <div className="order-count">
+          <span className="count-number">{orders.length}</span>
+          <span className="count-label">bestillinger</span>
         </div>
-      ) : (
-        <div className="orders-grid">
-          {orders.map((order) => (
-            <div key={order.id} className="order-note">
-              <div className="order-header">
-                <span className="order-id">#{order.id}</span>
-                <span className="order-time">{formatTime(order.created_at)}</span>
-              </div>
-
-              <div className="order-content">
-                <div className="order-mad">{order.mad}</div>
-                {order.drikke && (
-                  <div className="order-drikke">🥤 {order.drikke}</div>
-                )}
-                {order.ekstra_info && (
-                  <div className="order-ekstra">💬 {order.ekstra_info}</div>
-                )}
-                {order.telefon && (
-                  <div className="order-telefon">📞 {order.telefon}</div>
-                )}
-              </div>
-
-              <div className={`status-badge status-${order.status}`}>
+      </div>
+      
+      <div className="orders-grid">
+        {orders.map(order => (
+          <div key={order.id} className="order-note">
+            <div className="note-header">
+              <div className="order-id">#{order.id}</div>
+              <div 
+                className="status-badge"
+                style={{ backgroundColor: getStatusColor(order.status) }}
+              >
                 {getStatusText(order.status)}
               </div>
-
-              <div className="order-actions">
-                {getNextStatus(order.status) && (
-                  <button
-                    className="action-btn primary"
-                    onClick={() => handleStatusUpdate(order.id, getNextStatus(order.status)!)}
-                    disabled={updatingOrder === order.id}
-                  >
-                    {updatingOrder === order.id ? 'Opdaterer...' : getStatusText(getNextStatus(order.status)!)}
-                  </button>
-                )}
-                
-                {order.status !== 'annulleret' && (
-                  <button
-                    className="action-btn danger"
-                    onClick={() => handleStatusUpdate(order.id, 'annulleret')}
-                    disabled={updatingOrder === order.id}
-                  >
-                    {updatingOrder === order.id ? 'Opdaterer...' : 'Annuller'}
-                  </button>
-                )}
+            </div>
+            
+            <div className="note-content">
+              {order.mad && (
+                <div className="order-item">
+                  <strong>🍽️ Mad:</strong> {order.mad}
+                </div>
+              )}
+              
+              {order.drikke && (
+                <div className="order-item">
+                  <strong>🥤 Drikke:</strong> {order.drikke}
+                </div>
+              )}
+              
+              {order.ekstra_info && (
+                <div className="order-item">
+                  <strong>📝 Ekstra info:</strong> {order.ekstra_info}
+                </div>
+              )}
+              
+              {order.telefon && (
+                <div className="order-item">
+                  <strong>📞 Telefon:</strong> {order.telefon}
+                </div>
+              )}
+              
+              <div className="order-timestamp">
+                {new Date(order.timestamp).toLocaleString('da-DK')}
               </div>
             </div>
-          ))}
-        </div>
-      )}
+            
+            <div className="note-actions">
+              {order.status === 'ny' && (
+                <button
+                  className="action-btn process-btn"
+                  onClick={() => handleStatusUpdate(order.id, 'behandles')}
+                  disabled={updatingOrder === order.id}
+                >
+                  {updatingOrder === order.id ? 'Opdaterer...' : 'Behandles'}
+                </button>
+              )}
+              
+              {order.status === 'behandles' && (
+                <>
+                  <button
+                    className="action-btn ready-btn"
+                    onClick={() => handleStatusUpdate(order.id, 'klar')}
+                    disabled={updatingOrder === order.id}
+                  >
+                    {updatingOrder === order.id ? 'Opdaterer...' : 'Klar'}
+                  </button>
+                  <button
+                    className="action-btn back-btn"
+                    onClick={() => handleStatusUpdate(order.id, 'ny')}
+                    disabled={updatingOrder === order.id}
+                  >
+                    {updatingOrder === order.id ? 'Opdaterer...' : 'Tilbage'}
+                  </button>
+                </>
+              )}
+              
+              {order.status === 'klar' && (
+                <>
+                  <button
+                    className="action-btn sent-btn"
+                    onClick={() => handleStatusUpdate(order.id, 'afsendt')}
+                    disabled={updatingOrder === order.id}
+                  >
+                    {updatingOrder === order.id ? 'Opdaterer...' : 'Afsendt'}
+                  </button>
+                  <button
+                    className="action-btn back-btn"
+                    onClick={() => handleStatusUpdate(order.id, 'behandles')}
+                    disabled={updatingOrder === order.id}
+                  >
+                    {updatingOrder === order.id ? 'Opdaterer...' : 'Tilbage'}
+                  </button>
+                </>
+              )}
+              
+              {order.status === 'afsendt' && (
+                <button
+                  className="action-btn back-btn"
+                  onClick={() => handleStatusUpdate(order.id, 'klar')}
+                  disabled={updatingOrder === order.id}
+                >
+                  {updatingOrder === order.id ? 'Opdaterer...' : 'Tilbage'}
+                </button>
+              )}
+              
+              {canRevertStatus(order.status) && (
+                <button
+                  className="action-btn cancel-btn"
+                  onClick={() => handleStatusUpdate(order.id, 'annulleret')}
+                  disabled={updatingOrder === order.id}
+                >
+                  {updatingOrder === order.id ? 'Opdaterer...' : 'Annuller'}
+                </button>
+              )}
+              
+              {order.status === 'annulleret' && (
+                <button
+                  className="action-btn reactivate-btn"
+                  onClick={() => handleStatusUpdate(order.id, getPreviousStatus(order.status))}
+                  disabled={updatingOrder === order.id}
+                >
+                  {updatingOrder === order.id ? 'Opdaterer...' : 'Genaktiver'}
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
