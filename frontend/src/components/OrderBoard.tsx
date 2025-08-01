@@ -1,16 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { orderAPI } from '../services/api';
+import { orderAPI, Order } from '../services/api';
 import './OrderBoard.css';
-
-interface Order {
-  id: number;
-  mad: string;
-  drikke: string;
-  ekstra_info: string;
-  telefon: string;
-  status: string;
-  timestamp: string;
-}
 
 const OrderBoard: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -66,7 +56,7 @@ const OrderBoard: React.FC = () => {
       setOrders(prevOrders => 
         prevOrders.map(order => 
           order.id === id 
-            ? { ...order, status: newStatus }
+            ? { ...order, status: newStatus as any }
             : order
         )
       );
@@ -195,7 +185,7 @@ const OrderBoard: React.FC = () => {
               )}
               
               <div className="order-timestamp">
-                {new Date(order.timestamp).toLocaleString('da-DK')}
+                {new Date(order.created_at).toLocaleString('da-DK')}
               </div>
             </div>
             
