@@ -13,7 +13,6 @@ interface CartItem {
 }
 
 const Home: React.FC = () => {
-  const [currentStep, setCurrentStep] = useState<'food' | 'drinks' | 'review'>('food');
   const [foodItems, setFoodItems] = useState<MenuItem[]>([]);
   const [drinkItems, setDrinkItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -106,7 +105,6 @@ const Home: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      // Format order for backend
       const foodItems = getFoodItems();
       const drinkItems = getDrinkItems();
       
@@ -121,7 +119,6 @@ const Home: React.FC = () => {
       
       setMessage({ type: 'success', text: 'Bestilling modtaget! Tak for din bestilling.' });
       setCart([]);
-      setCurrentStep('food');
       setCustomerInfo({ telefon: '', ekstra_info: '' });
       
     } catch (error) {
@@ -152,188 +149,120 @@ const Home: React.FC = () => {
         <p className="tagline">Bestil mad og drikke online</p>
       </div>
 
-      {/* Progress Steps */}
-      <div className="progress-steps">
-        <div className={`step ${currentStep === 'food' ? 'active' : ''} ${currentStep === 'food' || currentStep === 'drinks' || currentStep === 'review' ? 'completed' : ''}`}>
-          <div className="step-number">1</div>
-          <div className="step-label">Vælg Mad</div>
-        </div>
-        <div className={`step ${currentStep === 'drinks' ? 'active' : ''} ${currentStep === 'drinks' || currentStep === 'review' ? 'completed' : ''}`}>
-          <div className="step-number">2</div>
-          <div className="step-label">Vælg Drikke</div>
-        </div>
-        <div className={`step ${currentStep === 'review' ? 'active' : ''} ${currentStep === 'review' ? 'completed' : ''}`}>
-          <div className="step-number">3</div>
-          <div className="step-label">Gennemse</div>
-        </div>
-      </div>
-
-      {/* Food Menu Step */}
-      {currentStep === 'food' && (
-        <div className="card">
-          <h2>🍽️ Vælg din mad</h2>
+      <div className="card">
+        <h2>🍽️ Vælg din mad</h2>
+        <div className="menu-section">
           <div className="menu-grid">
             {foodItems.map(item => (
-              <div key={item.id} className="menu-item-card">
-                <div className="item-info">
-                  <h3>{item.name}</h3>
-                  <p className="item-description">{item.description}</p>
-                  <div className="item-price">{item.price} kr</div>
-                </div>
-                <div className="item-actions">
-                  <button 
-                    className="btn btn-secondary"
-                    onClick={() => removeFromCart(item.id, 'food')}
-                    disabled={!getFoodItems().find(cartItem => cartItem.id === item.id)}
-                  >
-                    -
-                  </button>
-                  <span className="quantity">
-                    {getFoodItems().find(cartItem => cartItem.id === item.id)?.quantity || 0}
-                  </span>
-                  <button 
-                    className="btn btn-primary"
+              <div key={item.id} className="menu-item">
+                <div className="item-selector">
+                  <div 
+                    className={`circle-selector ${getFoodItems().find(cartItem => cartItem.id === item.id) ? 'selected' : ''}`}
                     onClick={() => addToCart(item, 'food')}
                   >
-                    +
-                  </button>
+                    {getFoodItems().find(cartItem => cartItem.id === item.id) && (
+                      <div className="checkmark">✓</div>
+                    )}
+                  </div>
+                  <div className="item-info">
+                    <h3>{item.name}</h3>
+                    <p>{item.description}</p>
+                    <span className="price">{item.price} kr</span>
+                  </div>
                 </div>
+                {getFoodItems().find(cartItem => cartItem.id === item.id) && (
+                  <div className="quantity-controls">
+                    <button 
+                      className="quantity-btn"
+                      onClick={() => removeFromCart(item.id, 'food')}
+                    >
+                      -
+                    </button>
+                    <span className="quantity">{getFoodItems().find(cartItem => cartItem.id === item.id)?.quantity || 0}</span>
+                    <button 
+                      className="quantity-btn"
+                      onClick={() => addToCart(item, 'food')}
+                    >
+                      +
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
-          
-          <div className="step-navigation">
-            <button 
-              className="btn btn-secondary"
-              onClick={() => setCurrentStep('drinks')}
-              disabled={getFoodItems().length === 0}
-            >
-              Næste: Vælg Drikke →
-            </button>
-          </div>
         </div>
-      )}
 
-      {/* Drinks Menu Step */}
-      {currentStep === 'drinks' && (
-        <div className="card">
-          <h2>🥤 Vælg dine drikke</h2>
+        <h2>🥤 Vælg dine drikke</h2>
+        <div className="menu-section">
           <div className="menu-grid">
             {drinkItems.map(item => (
-              <div key={item.id} className="menu-item-card">
-                <div className="item-info">
-                  <h3>{item.name}</h3>
-                  <p className="item-description">{item.description}</p>
-                  <div className="item-price">{item.price} kr</div>
-                </div>
-                <div className="item-actions">
-                  <button 
-                    className="btn btn-secondary"
-                    onClick={() => removeFromCart(item.id, 'drink')}
-                    disabled={!getDrinkItems().find(cartItem => cartItem.id === item.id)}
-                  >
-                    -
-                  </button>
-                  <span className="quantity">
-                    {getDrinkItems().find(cartItem => cartItem.id === item.id)?.quantity || 0}
-                  </span>
-                  <button 
-                    className="btn btn-primary"
+              <div key={item.id} className="menu-item">
+                <div className="item-selector">
+                  <div 
+                    className={`circle-selector ${getDrinkItems().find(cartItem => cartItem.id === item.id) ? 'selected' : ''}`}
                     onClick={() => addToCart(item, 'drink')}
                   >
-                    +
-                  </button>
+                    {getDrinkItems().find(cartItem => cartItem.id === item.id) && (
+                      <div className="checkmark">✓</div>
+                    )}
+                  </div>
+                  <div className="item-info">
+                    <h3>{item.name}</h3>
+                    <p>{item.description}</p>
+                    <span className="price">{item.price} kr</span>
+                  </div>
                 </div>
+                {getDrinkItems().find(cartItem => cartItem.id === item.id) && (
+                  <div className="quantity-controls">
+                    <button 
+                      className="quantity-btn"
+                      onClick={() => removeFromCart(item.id, 'drink')}
+                    >
+                      -
+                    </button>
+                    <span className="quantity">{getDrinkItems().find(cartItem => cartItem.id === item.id)?.quantity || 0}</span>
+                    <button 
+                      className="quantity-btn"
+                      onClick={() => addToCart(item, 'drink')}
+                    >
+                      +
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
-          
-          <div className="step-navigation">
-            <button 
-              className="btn btn-secondary"
-              onClick={() => setCurrentStep('food')}
-            >
-              ← Tilbage til Mad
-            </button>
-            <button 
-              className="btn btn-primary"
-              onClick={() => setCurrentStep('review')}
-            >
-              Næste: Gennemse →
-            </button>
-          </div>
         </div>
-      )}
 
-      {/* Review Step */}
-      {currentStep === 'review' && (
-        <div className="card">
-          <h2>📋 Gennemse din bestilling</h2>
-          
-          {cart.length === 0 ? (
-            <div className="empty-cart">
-              <p>Din indkøbskurv er tom</p>
-              <button className="btn" onClick={() => setCurrentStep('food')}>
-                Tilføj mad og drikke
-              </button>
-            </div>
-          ) : (
-            <>
-              {/* Food Items */}
-              {getFoodItems().length > 0 && (
-                <div className="review-section">
-                  <h3>🍽️ Mad</h3>
-                  {getFoodItems().map(item => (
-                    <div key={`${item.id}-${item.type}`} className="review-item">
-                      <div className="item-details">
-                        <div className="item-header">
-                          <h4>{item.name}</h4>
-                          <span className="item-quantity">x{item.quantity}</span>
-                        </div>
-                        <div className="item-price">{item.price * item.quantity} kr</div>
-                      </div>
-                      <div className="item-notes">
-                        <input
-                          type="text"
-                          placeholder="Tilføj noter (f.eks. 'ingen løg', 'ekstra ost')"
-                          value={item.notes}
-                          onChange={(e) => updateItemNotes(item.id, item.type, e.target.value)}
-                          className="notes-input"
-                        />
-                      </div>
+        {cart.length > 0 && (
+          <>
+            <h2>📋 Din bestilling</h2>
+            <div className="order-review">
+              {cart.map(item => (
+                <div key={`${item.id}-${item.type}`} className="order-item">
+                  <div className="item-details">
+                    <div className="item-header">
+                      <h4>{item.name}</h4>
+                      <span className="item-quantity">x{item.quantity}</span>
                     </div>
-                  ))}
+                    <div className="item-price">{item.price * item.quantity} kr</div>
+                  </div>
+                  <div className="item-notes">
+                    <input
+                      type="text"
+                      placeholder="Tilføj noter (f.eks. 'ingen løg', 'ekstra ost')"
+                      value={item.notes}
+                      onChange={(e) => updateItemNotes(item.id, item.type, e.target.value)}
+                      className="notes-input"
+                    />
+                  </div>
                 </div>
-              )}
+              ))}
+              
+              <div className="order-total">
+                <h3>Total: {getCartTotal()} kr</h3>
+              </div>
 
-              {/* Drink Items */}
-              {getDrinkItems().length > 0 && (
-                <div className="review-section">
-                  <h3>🥤 Drikke</h3>
-                  {getDrinkItems().map(item => (
-                    <div key={`${item.id}-${item.type}`} className="review-item">
-                      <div className="item-details">
-                        <div className="item-header">
-                          <h4>{item.name}</h4>
-                          <span className="item-quantity">x{item.quantity}</span>
-                        </div>
-                        <div className="item-price">{item.price * item.quantity} kr</div>
-                      </div>
-                      <div className="item-notes">
-                        <input
-                          type="text"
-                          placeholder="Tilføj noter (f.eks. 'uden is', 'ekstra sukker')"
-                          value={item.notes}
-                          onChange={(e) => updateItemNotes(item.id, item.type, e.target.value)}
-                          className="notes-input"
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Customer Info */}
               <div className="customer-info">
                 <h3>📞 Kontaktoplysninger</h3>
                 <div className="form-group">
@@ -358,30 +287,23 @@ const Home: React.FC = () => {
                 </div>
               </div>
 
-              {/* Total */}
-              <div className="order-total">
-                <h3>💰 Total: {getCartTotal()} kr</h3>
-              </div>
+              <button 
+                className="btn submit-btn"
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Sender...' : 'Send Bestilling'}
+              </button>
+            </div>
+          </>
+        )}
 
-              <div className="step-navigation">
-                <button 
-                  className="btn btn-secondary"
-                  onClick={() => setCurrentStep('drinks')}
-                >
-                  ← Tilbage til Drikke
-                </button>
-                <button 
-                  className="btn btn-primary"
-                  onClick={handleSubmit}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Sender...' : 'Send Bestilling'}
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-      )}
+        {cart.length === 0 && (
+          <div className="empty-cart">
+            <p>Vælg mad og drikke fra menuen ovenfor</p>
+          </div>
+        )}
+      </div>
 
       {message && (
         <div className={`message ${message.type}`}>
