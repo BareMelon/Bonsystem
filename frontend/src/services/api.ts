@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// API base URL - use Railway backend in production
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://bonsystem-production.up.railway.app/api';
+// API base URL - use local backend in development, Railway in production
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

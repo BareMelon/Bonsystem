@@ -41,7 +41,7 @@ app.get('/', (req, res) => {
   res.json({ message: 'Bon System Backend er kørende' });
 });
 
-// Database setup (with error handling) - Updated for better-sqlite3
+// Database setup (with error handling)
 console.log('Setting up database...');
 let db;
 try {
@@ -52,14 +52,10 @@ try {
   // Continue without database for now
 }
 
-// Routes (only if database is available)
-if (db) {
-  app.use('/api/orders', require('./routes/orders'));
-  app.use('/api/admin', require('./routes/admin'));
-  app.use('/api/menu', require('./routes/menu'));
-} else {
-  console.log('Skipping routes due to database error');
-}
+// Routes (always load routes, database handles its own errors)
+app.use('/api/orders', require('./routes/orders'));
+app.use('/api/admin', require('./routes/admin'));
+app.use('/api/menu', require('./routes/menu'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

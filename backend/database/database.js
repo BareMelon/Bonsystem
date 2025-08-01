@@ -3,6 +3,7 @@ console.log('Using in-memory database for reliability');
 
 // In-memory storage
 let orders = [];
+let orderIdCounter = 0; // Proper ID counter that never resets
 let settings = [
   { key: 'restaurant_name', value: 'me&ma' },
   { key: 'admin_phone', value: '+4553379153' },
@@ -32,25 +33,29 @@ console.log('In-memory database initialized successfully');
 const dbHelpers = {
   // Get all orders
   getAllOrders: () => {
+    console.log(`Database: getAllOrders called, returning ${orders.length} orders`);
+    console.log('Orders:', orders.map(o => ({ id: o.id, status: o.status, mad: o.mad })));
     return Promise.resolve(orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
   },
 
   // Get order by ID
   getOrderById: (id) => {
-    return Promise.resolve(orders.find(order => order.id === id) || null);
+    return Promise.resolve(orders.find(order => order.id === parseInt(id)) || null);
   },
 
   // Create new order
   createOrder: (orderData) => {
+    orderIdCounter++; // Increment counter for unique ID
     const newOrder = {
-      id: orders.length + 1,
+      id: orderIdCounter,
       ...orderData,
       status: 'ny',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
     orders.push(newOrder);
-    console.log('Order created:', newOrder);
+    console.log(`Order created with ID ${orderIdCounter}:`, newOrder);
+    console.log(`Total orders now: ${orders.length}`);
     return Promise.resolve(newOrder);
   },
 
