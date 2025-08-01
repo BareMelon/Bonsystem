@@ -60,6 +60,13 @@ export const orderAPI = {
       return response.data;
     } catch (error: any) {
       console.error('Fejl ved oprettelse af bestilling:', error);
+      
+      // Check if it's a rate limiting error
+      if (error.response?.status === 429) {
+        const retryAfter = error.response.headers['retry-after'] || 60;
+        throw new Error(`For mange bestillinger. Vent venligst ${retryAfter} sekunder før du prøver igen.`);
+      }
+      
       throw new Error('Kunne ikke oprette bestilling');
     }
   },

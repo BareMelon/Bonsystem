@@ -93,9 +93,18 @@ router.post('/', async (req, res) => {
 
   } catch (error) {
     console.error('Fejl ved oprettelse af bestilling:', error);
-    res.status(500).json({
-      error: 'Der opstod en fejl ved oprettelse af bestillingen'
-    });
+    
+    // Check if it's a database error
+    if (error.message && error.message.includes('For mange bestillinger')) {
+      res.status(429).json({
+        error: 'For mange bestillinger. Vent venligst 1 minut før du prøver igen.',
+        retryAfter: 60
+      });
+    } else {
+      res.status(500).json({
+        error: 'Der opstod en fejl ved oprettelse af bestillingen'
+      });
+    }
   }
 });
 

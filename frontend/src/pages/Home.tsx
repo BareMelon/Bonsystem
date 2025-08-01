@@ -121,8 +121,17 @@ const Home: React.FC = () => {
       setCart([]);
       setCustomerInfo({ telefon: '', ekstra_info: '' });
       
-    } catch (error) {
-      setMessage({ type: 'error', text: 'Der opstod en fejl ved afsendelse af bestillingen' });
+    } catch (error: any) {
+      // Check if it's a rate limiting error
+      if (error.response?.status === 429) {
+        const retryAfter = error.response.headers['retry-after'] || 60;
+        setMessage({ 
+          type: 'error', 
+          text: `For mange bestillinger. Vent venligst ${retryAfter} sekunder før du prøver igen.` 
+        });
+      } else {
+        setMessage({ type: 'error', text: 'Der opstod en fejl ved afsendelse af bestillingen' });
+      }
     } finally {
       setIsSubmitting(false);
     }

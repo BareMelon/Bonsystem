@@ -18,12 +18,24 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Rate limiting
-const limiter = rateLimit({
+// Rate limiting for general requests
+const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100 // limit each IP to 100 requests per windowMs
 });
-app.use(limiter);
+app.use(generalLimiter);
+
+// Specific rate limiting for orders (more restrictive)
+const orderLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 5, // limit each IP to 5 orders per minute
+  message: {
+    error: 'For mange bestillinger. Vent venligst 1 minut før du prøver igen.',
+    retryAfter: 60
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // Simple health check (works even if database fails)
 app.get('/api/health', (req, res) => {
@@ -53,7 +65,7 @@ try {
 }
 
 // Routes (always load routes, database handles its own errors)
-app.use('/api/orders', require('./routes/orders'));
+app.use('/api/orders', orderLimiter, require('./routes/orders'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/menu', require('./routes/menu'));
 

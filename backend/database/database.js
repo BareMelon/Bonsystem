@@ -4,6 +4,7 @@ console.log('Using in-memory database for reliability');
 // In-memory storage
 let orders = [];
 let orderIdCounter = 0; // Proper ID counter that never resets
+let lastOrderTime = 0; // Track last order time for cooldown
 let settings = [
   { key: 'restaurant_name', value: 'me&ma' },
   { key: 'admin_phone', value: '+4553379153' },
@@ -45,6 +46,15 @@ const dbHelpers = {
 
   // Create new order
   createOrder: (orderData) => {
+    const now = Date.now();
+    const timeSinceLastOrder = now - lastOrderTime;
+    
+    // Check if too soon since last order (5 second cooldown)
+    if (timeSinceLastOrder < 5000) {
+      const waitTime = Math.ceil((5000 - timeSinceLastOrder) / 1000);
+      throw new Error(`For mange bestillinger. Vent venligst ${waitTime} sekunder før du prøver igen.`);
+    }
+    
     orderIdCounter++; // Increment counter for unique ID
     const newOrder = {
       id: orderIdCounter,
@@ -54,6 +64,7 @@ const dbHelpers = {
       updated_at: new Date().toISOString()
     };
     orders.push(newOrder);
+    lastOrderTime = now; // Update last order time
     console.log(`Order created with ID ${orderIdCounter}:`, newOrder);
     console.log(`Total orders now: ${orders.length}`);
     return Promise.resolve(newOrder);
