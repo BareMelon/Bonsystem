@@ -63,6 +63,15 @@ export const orderAPI = {
       throw new Error('Kunne ikke oprette bestilling');
     }
   },
+  getOrders: async () => {
+    try {
+      const response = await api.get<OrderResponse>('/orders');
+      return response.data;
+    } catch (error: any) {
+      console.error('Fejl ved hentning af bestillinger:', error);
+      throw new Error('Kunne ikke hente bestillinger');
+    }
+  },
   getAllOrders: async () => {
     try {
       const response = await api.get<OrderResponse>('/orders');
