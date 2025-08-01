@@ -58,7 +58,7 @@ export const orderAPI = {
     try {
       const response = await api.post<OrderResponse>('/orders', order);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Fejl ved oprettelse af bestilling:', error);
       throw new Error('Kunne ikke oprette bestilling');
     }
@@ -67,7 +67,7 @@ export const orderAPI = {
     try {
       const response = await api.get<OrderResponse>('/orders');
       return response.data.orders || [];
-    } catch (error) {
+    } catch (error: any) {
       console.error('Fejl ved hentning af bestillinger:', error);
       throw new Error('Kunne ikke hente bestillinger');
     }
@@ -76,7 +76,7 @@ export const orderAPI = {
     try {
       const response = await api.get<OrderResponse>(`/orders/${id}`);
       return response.data.order;
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Fejl ved hentning af bestilling ${id}:`, error);
       throw new Error('Kunne ikke hente bestilling');
     }
@@ -88,9 +88,11 @@ export const orderAPI = {
       const response = await api.put<OrderResponse>(`/orders/${id}/status`, { status });
       console.log('API response:', response.data);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Fejl ved opdatering af status for bestilling ${id}:`, error);
-      console.error('API error details:', error.response?.data);
+      if (error.response?.data) {
+        console.error('API error details:', error.response.data);
+      }
       throw new Error('Kunne ikke opdatere bestillingsstatus');
     }
   },
@@ -102,7 +104,7 @@ export const adminAPI = {
     try {
       const response = await api.get<{ settings: Settings }>('/admin/settings');
       return response.data.settings;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Fejl ved hentning af indstillinger:', error);
       throw new Error('Kunne ikke hente indstillinger');
     }
@@ -111,7 +113,7 @@ export const adminAPI = {
     try {
       const response = await api.put<{ success: boolean; message: string }>('/admin/settings', settings);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Fejl ved opdatering af indstillinger:', error);
       throw new Error('Kunne ikke opdatere indstillinger');
     }
@@ -120,7 +122,7 @@ export const adminAPI = {
     try {
       const response = await api.get<{ stats: Stats }>('/admin/stats');
       return response.data.stats;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Fejl ved hentning af statistik:', error);
       throw new Error('Kunne ikke hente statistik');
     }
@@ -129,7 +131,7 @@ export const adminAPI = {
     try {
       const response = await api.delete<{ success: boolean; message: string }>(`/admin/orders/${id}`);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Fejl ved sletning af bestilling ${id}:`, error);
       throw new Error('Kunne ikke slette bestilling');
     }
@@ -142,7 +144,7 @@ export const menuAPI = {
     try {
       const response = await api.get<{ success: boolean; items: MenuItem[] }>('/menu/food');
       return response.data.items;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Fejl ved hentning af mad:', error);
       throw new Error('Kunne ikke hente mad');
     }
@@ -151,7 +153,7 @@ export const menuAPI = {
     try {
       const response = await api.get<{ success: boolean; items: MenuItem[] }>('/menu/drinks');
       return response.data.items;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Fejl ved hentning af drikke:', error);
       throw new Error('Kunne ikke hente drikke');
     }
@@ -160,7 +162,7 @@ export const menuAPI = {
     try {
       const response = await api.post<{ success: boolean; item: MenuItem }>('/menu/food', item);
       return response.data.item;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Fejl ved oprettelse af mad:', error);
       throw new Error('Kunne ikke oprette mad');
     }
@@ -169,7 +171,7 @@ export const menuAPI = {
     try {
       const response = await api.post<{ success: boolean; item: MenuItem }>('/menu/drinks', item);
       return response.data.item;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Fejl ved oprettelse af drikke:', error);
       throw new Error('Kunne ikke oprette drikke');
     }
@@ -178,7 +180,7 @@ export const menuAPI = {
     try {
       const response = await api.put<{ success: boolean; item: MenuItem }>(`/menu/food/${id}`, item);
       return response.data.item;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Fejl ved opdatering af mad:', error);
       throw new Error('Kunne ikke opdatere mad');
     }
@@ -187,7 +189,7 @@ export const menuAPI = {
     try {
       const response = await api.put<{ success: boolean; item: MenuItem }>(`/menu/drinks/${id}`, item);
       return response.data.item;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Fejl ved opdatering af drikke:', error);
       throw new Error('Kunne ikke opdatere drikke');
     }
@@ -196,7 +198,7 @@ export const menuAPI = {
     try {
       const response = await api.delete<{ success: boolean }>(`/menu/food/${id}`);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Fejl ved sletning af mad:', error);
       throw new Error('Kunne ikke slette mad');
     }
@@ -205,7 +207,7 @@ export const menuAPI = {
     try {
       const response = await api.delete<{ success: boolean }>(`/menu/drinks/${id}`);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Fejl ved sletning af drikke:', error);
       throw new Error('Kunne ikke slette drikke');
     }
