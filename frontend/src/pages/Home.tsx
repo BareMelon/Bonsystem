@@ -109,8 +109,8 @@ const Home: React.FC = () => {
       const drinkItems = getDrinkItems();
       
       const orderData = {
-        mad: foodItems.map(item => `${item.name}${item.notes ? ` (${item.notes})` : ''}`).join(', '),
-        drikke: drinkItems.map(item => `${item.name}${item.notes ? ` (${item.notes})` : ''}`).join(', '),
+        mad: foodItems.length > 0 ? foodItems.map(item => `${item.name}${item.notes ? ` (${item.notes})` : ''}`).join(', ') : '',
+        drikke: drinkItems.length > 0 ? drinkItems.map(item => `${item.name}${item.notes ? ` (${item.notes})` : ''}`).join(', ') : '',
         ekstra_info: customerInfo.ekstra_info,
         telefon: customerInfo.telefon
       };

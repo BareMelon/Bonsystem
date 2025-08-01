@@ -40,7 +40,7 @@ const sendSMSNotification = async (orderData) => {
   try {
     const message = `🍽️ NY BESTILLING - me&ma
 
-Mad: ${orderData.mad}
+${orderData.mad ? `Mad: ${orderData.mad}` : ''}
 ${orderData.drikke ? `Drikke: ${orderData.drikke}` : ''}
 ${orderData.ekstra_info ? `Ekstra: ${orderData.ekstra_info}` : ''}
 ${orderData.telefon ? `Telefon: ${orderData.telefon}` : ''}
@@ -67,10 +67,10 @@ router.post('/', async (req, res) => {
   try {
     const { mad, drikke, ekstra_info, telefon } = req.body;
 
-    // Validate required fields
-    if (!mad) {
+    // Validate required fields - must have either mad or drikke
+    if (!mad && !drikke) {
       return res.status(400).json({
-        error: 'Mad er påkrævet'
+        error: 'Du skal vælge mindst mad eller drikke'
       });
     }
 
