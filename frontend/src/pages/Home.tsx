@@ -138,6 +138,7 @@ const Home: React.FC = () => {
         <div className="card text-center">
           <p>Indlæser menu...</p>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -147,9 +148,19 @@ const Home: React.FC = () => {
       <div className="header">
         <h1 className="logo">me&ma</h1>
         <p className="tagline">Bestil mad og drikke online</p>
+        <div className="polkadot-decoration">
+          <div className="dot"></div>
+          <div className="dot"></div>
+          <div className="dot"></div>
+        </div>
       </div>
 
       <div className="card">
+        <div className="allergen-notice">
+          <div className="allergen-icon">⚠️</div>
+          <p>Spørgsmål til allergener? Henvend dig til personalet</p>
+        </div>
+
         <h2>🍽️ Vælg din mad</h2>
         <div className="menu-section">
           <div className="menu-grid">
@@ -281,9 +292,13 @@ const Home: React.FC = () => {
                     id="ekstra_info"
                     value={customerInfo.ekstra_info}
                     onChange={(e) => setCustomerInfo({ ...customerInfo, ekstra_info: e.target.value })}
-                    placeholder="Særlige ønsker eller allergier..."
+                    placeholder="Særlige ønsker, allergier eller andre bemærkninger..."
                     rows={3}
                   />
+                </div>
+                <div className="allergen-reminder">
+                  <div className="allergen-icon-small">⚠️</div>
+                  <p>Husk at informere om allergier i noter eller til personalet</p>
                 </div>
               </div>
 
@@ -300,6 +315,11 @@ const Home: React.FC = () => {
 
         {cart.length === 0 && (
           <div className="empty-cart">
+            <div className="polkadot-decoration-small">
+              <div className="dot-small"></div>
+              <div className="dot-small"></div>
+              <div className="dot-small"></div>
+            </div>
             <p>Vælg mad og drikke fra menuen ovenfor</p>
           </div>
         )}
@@ -314,7 +334,45 @@ const Home: React.FC = () => {
       <div className="admin-link">
         <a href="/admin">Admin Panel</a>
       </div>
+
+      <Footer />
     </div>
+  );
+};
+
+// Footer Component
+const Footer: React.FC = () => {
+  return (
+    <footer className="footer">
+      <div className="footer-content">
+        <div className="footer-section">
+          <h4>Kontakt</h4>
+          <p>Har du spørgsmål eller feedback?</p>
+          <a href="mailto:itsmeandma@gmail.com" className="contact-link">
+            itsmeandma@gmail.com
+          </a>
+        </div>
+        
+        <div className="footer-section">
+          <h4>Links</h4>
+          <div className="footer-links">
+            <a href="/tos" className="footer-link">Vilkår og betingelser</a>
+            <a href="/privacy" className="footer-link">Privatlivspolitik</a>
+            <a href="/admin" className="footer-link">Admin</a>
+          </div>
+        </div>
+        
+        <div className="footer-section">
+          <h4>me&ma</h4>
+          <p>Bestil mad og drikke online</p>
+          <div className="allergen-info">
+            <div className="allergen-icon-small">⚠️</div>
+            <p>Spørgsmål til allergener? Henvend dig til personalet</p>
+          </div>
+          <p className="copyright">© 2024 me&ma. Alle rettigheder forbeholdes.</p>
+        </div>
+      </div>
+    </footer>
   );
 };
 
