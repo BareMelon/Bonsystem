@@ -6,9 +6,9 @@ let orders = [];
 let settings = [
   { key: 'restaurant_name', value: 'me&ma' },
   { key: 'admin_phone', value: '+4553379153' },
-  { key: 'twilio_account_sid', value: 'AC93b2e23e138b0ba223736c1aff4944d1' },
-  { key: 'twilio_auth_token', value: '5166b7d3d87676f960bc01d8c224ff9a' },
-  { key: 'twilio_phone_number', value: '+17756405975' }
+  { key: 'twilio_account_sid', value: '' },
+  { key: 'twilio_auth_token', value: '' },
+  { key: 'twilio_phone_number', value: '' }
 ];
 
 // Menu items

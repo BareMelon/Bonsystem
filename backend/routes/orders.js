@@ -8,10 +8,10 @@ let twilioClient = null;
 const initializeTwilio = () => {
   try {
     // Try environment variables first, then fallback to database settings
-    const accountSid = process.env.TWILIO_ACCOUNT_SID || 'AC93b2e23e138b0ba223736c1aff4944d1';
-    const authToken = process.env.TWILIO_AUTH_TOKEN || '5166b7d3d87676f960bc01d8c224ff9a';
-    const twilioPhone = process.env.TWILIO_PHONE_NUMBER || '+17756405975';
-    const adminPhone = process.env.ADMIN_PHONE || '+4553379153';
+            const accountSid = process.env.TWILIO_ACCOUNT_SID || '';
+        const authToken = process.env.TWILIO_AUTH_TOKEN || '';
+        const twilioPhone = process.env.TWILIO_PHONE_NUMBER || '';
+        const adminPhone = process.env.ADMIN_PHONE || '+4553379153';
 
     if (accountSid && authToken && twilioPhone) {
       const twilio = require('twilio');
